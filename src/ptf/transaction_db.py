@@ -42,3 +42,9 @@ class TransactionDB:
             raise FileNotFoundError(f"File not found: {file_path}") from e
 
         return self.transactions, self.all_items
+
+    def to_string(self):
+        result = ""
+        for idx, transaction in enumerate(self.transactions):
+            result += f"Transaction {idx + 1}: {transaction}\n"
+        return result

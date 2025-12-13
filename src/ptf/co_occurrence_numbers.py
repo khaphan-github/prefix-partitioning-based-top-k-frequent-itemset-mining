@@ -14,7 +14,7 @@ class CoOccurrenceNumbers:
     def __init__(self, prefix_partition: PrefixPartitioning, transaction_db: TransactionDB):
         self.prefix_partition = prefix_partition
         self.transaction_db = transaction_db
-        self.co_occurrence_numbers = self.compute_co_occurrence_numbers()
+        self.co_occurrence_numbers, self.full_co_occurrence_list = self.compute_co_occurrence_numbers()
 
     def compute_co_occurrence_numbers(self):
         partition_con_dict = self._build_partition_con()
@@ -72,7 +72,12 @@ class CoOccurrenceNumbers:
         for prefix, con_list in CoN.items():
             con_list.sort(key=lambda x: x[1], reverse=True)
             CoN[prefix] = con_list
-        return CoN
+
+        full_con_list = []
+        for prefix, con_list in CoN.items():
+            full_con_list.extend(con_list)
+        full_con_list.sort(key=lambda x: x[1], reverse=True)
+        return CoN, full_con_list
 
     def to_string(self):
         result = ""

@@ -118,14 +118,15 @@ class TestCoOccurrenceNumbers:
             1: {2: 3, 3: 2, 1: 1}
         }
 
-        result = co_occ._merge_partition_con(partition_con_dict)
+        result_dict, result_list = co_occ._merge_partition_con(
+            partition_con_dict)
 
         # Result should be a dict with prefix as key
-        assert isinstance(result, dict)
-        assert 1 in result
+        assert isinstance(result_dict, dict)
+        assert 1 in result_dict
 
         # Check the list of (itemset, count) tuples
-        con_list = result[1]
+        con_list = result_dict[1]
         assert len(con_list) == 3
 
         # Verify items are sorted by count (descending)
@@ -150,21 +151,22 @@ class TestCoOccurrenceNumbers:
             2: {2: 1, 3: 4}
         }
 
-        result = co_occ._merge_partition_con(partition_con_dict)
+        result_dict, result_list = co_occ._merge_partition_con(
+            partition_con_dict)
 
         # Result should be a dict
-        assert isinstance(result, dict)
-        assert len(result) == 2
+        assert isinstance(result_dict, dict)
+        assert len(result_dict) == 2
 
         # Check prefix 1
-        assert 1 in result
-        con_list_1 = result[1]
+        assert 1 in result_dict
+        con_list_1 = result_dict[1]
         counts_1 = [count for _, count in con_list_1]
         assert counts_1 == sorted(counts_1, reverse=True)
 
         # Check prefix 2
-        assert 2 in result
-        con_list_2 = result[2]
+        assert 2 in result_dict
+        con_list_2 = result_dict[2]
         counts_2 = [count for _, count in con_list_2]
         assert counts_2 == sorted(counts_2, reverse=True)
 
@@ -175,10 +177,11 @@ class TestCoOccurrenceNumbers:
         co_occ = CoOccurrenceNumbers(
             mock_prefix_partition, mock_transaction_db)
 
-        result = co_occ._merge_partition_con({})
+        result_dict, result_list = co_occ._merge_partition_con({})
 
-        assert isinstance(result, dict)
-        assert result == {}
+        assert isinstance(result_dict, dict)
+        assert result_dict == {}
+        assert result_list == []
 
     def test_compute_co_occurrence_numbers_single_partition(self, mock_prefix_partition, mock_transaction_db):
         """Test compute_co_occurrence_numbers with single partition."""
@@ -285,11 +288,12 @@ class TestCoOccurrenceNumbers:
             'x': {'x': 5, 'y': 3, 'z': 2}
         }
 
-        result = co_occ._merge_partition_con(partition_con_dict)
+        result_dict, result_list = co_occ._merge_partition_con(
+            partition_con_dict)
 
         # Check set structure
-        assert 'x' in result
-        con_list = result['x']
+        assert 'x' in result_dict
+        con_list = result_dict['x']
         itemsets = [itemset for itemset, _ in con_list]
 
         assert {'x'} in itemsets
