@@ -28,4 +28,4 @@ class MinHeapTopK:
         return len(self.heap) == self.k
 
     def get_all(self) -> List[Tuple]:
-        return sorted(self.heap, key=lambda x: -x[0])  # Descending by support
+        return self.heap
