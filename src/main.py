@@ -24,10 +24,16 @@ if __name__ == "__main__":
 
     assert rmsup == 3
     assert len(min_heap.heap) == 8
-    
-    promissing_arr =  ptf.build_promissing_item_arrays(
+
+    promissing_arr = ptf.build_promissing_item_arrays(
         min_heap=min_heap,
         all_items=db.all_items,
     )
-    
-    print(promissing_arr)
+
+    filter_partitions = ptf.filter_partitions(
+        ar=promissing_arr,
+        all_items=db.all_items,
+        rmsup=rmsup,
+    )
+
+    print(filter_partitions)

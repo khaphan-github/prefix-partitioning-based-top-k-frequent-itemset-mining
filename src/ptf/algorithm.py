@@ -28,7 +28,7 @@ class PrefixPartitioningbasedTopKAlgorithm:
     def build_promissing_item_arrays(self, min_heap: MinHeapTopK, all_items):
         '''
         output:  [{ item1, item2, ...}, ...]
-        
+
         TODO:
         Itemset: (2, 4), Support: 3
         Itemset: (4,), Support: 4
@@ -51,9 +51,32 @@ class PrefixPartitioningbasedTopKAlgorithm:
             if len(itemset) == 1:
                 x_i = itemset[0]
                 promising_items_arr[x_i].append(x_i)
-                
+
             if len(itemset) == 2:
                 x_i, x_j = itemset
                 promising_items_arr[x_i].append(x_j)
 
         return promising_items_arr
+
+    def filter_partitions(self, ar: dict, all_items: List[int], con_map, rmsup):
+        partitions_to_process = []
+        skip_count = 0
+
+        for partition_item in all_items:
+            promising_items = ar[partition_item]
+
+            # Proved by Theorem 2,
+            if len(promising_items) <= 2:
+                skip_count += 1
+                continue
+            # TODO: Anti-monotone property
+            max_support = con_map.get((partition_item,), 0)
+            if max_support <= rmsup:
+                skip_count += 1
+                continue
+
+            partitions_to_process.append(partition_item)
+
+        print(f"Skipped {skip_count} partitions out of {len(all_items)}")
+
+        return partitions_to_process
