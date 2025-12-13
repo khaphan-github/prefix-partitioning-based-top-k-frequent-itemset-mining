@@ -30,10 +30,11 @@ if __name__ == "__main__":
         all_items=db.all_items,
     )
 
-    filter_partitions = ptf.filter_partitions(
+    ptf.filter_partitions(
         ar=promissing_arr,
         all_items=db.all_items,
         rmsup=rmsup,
+        min_heap=min_heap
     )
 
-    print(filter_partitions)
+    print(min_heap.get_all())

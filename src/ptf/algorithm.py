@@ -4,6 +4,7 @@
 
 from typing import List, Tuple
 from ptf.min_heap import MinHeapTopK
+from ptf.sgl_partition import SglPartition
 
 
 class PrefixPartitioningbasedTopKAlgorithm:
@@ -58,25 +59,19 @@ class PrefixPartitioningbasedTopKAlgorithm:
 
         return promising_items_arr
 
-    def filter_partitions(self, ar: dict, all_items: List[int], con_map, rmsup):
-        partitions_to_process = []
-        skip_count = 0
-
+    def filter_partitions(self, ar: dict, all_items: List[int], min_heap: MinHeapTopK, rmsup):
+        '''
+        '''
         for partition_item in all_items:
             promising_items = ar[partition_item]
+            for promissing_item in promising_items:
+                # TODO: Implement algorithms
+                min_sub_partition_item = -1
+                if promissing_item == partition_item or min_sub_partition_item <= rmsup:
+                    ar[partition_item] = []
+                    break
 
-            # Proved by Theorem 2,
             if len(promising_items) <= 2:
-                skip_count += 1
                 continue
-            # TODO: Anti-monotone property
-            max_support = con_map.get((partition_item,), 0)
-            if max_support <= rmsup:
-                skip_count += 1
-                continue
-
-            partitions_to_process.append(partition_item)
-
-        print(f"Skipped {skip_count} partitions out of {len(all_items)}")
-
-        return partitions_to_process
+            else:
+                SglPartition.execute(partition_item, promising_items, min_heap)
