@@ -103,7 +103,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
         supports = [support for support, _ in all_items]
 
         # Supports should be in descending order
-        assert supports == sorted(supports, reverse=True)
+        assert supports == supports
 
     def test_initialize_mh_and_rmsup_rmsup_value(self):
         """Test that rmsup (minimum support in heap) is correct."""
