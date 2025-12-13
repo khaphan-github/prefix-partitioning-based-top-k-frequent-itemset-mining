@@ -1,5 +1,6 @@
 from ptf.transaction_db import TransactionDB
 from ptf.prefix_partitioning import PrefixPartitioning
+from ptf.co_occurrence_numbers import CoOccurrenceNumbers
 
 
 if __name__ == "__main__":
@@ -12,11 +13,5 @@ if __name__ == "__main__":
     # Read transaction database
     db = TransactionDB("data/sample.txt")
     partitioner = PrefixPartitioning(db)
-    partitions = partitioner.prefix_partitions
-
-
-    for prefix in sorted(partitions.keys()):
-        suffixes = partitions[prefix]
-        print(f"Partition {prefix}: {len(suffixes)} suffixes")
-        for suffix in suffixes:  # Show first 3 suffixes
-            print(f"  → {suffix}")
+    co_occurrence_numbers = CoOccurrenceNumbers(partitioner, db)
+    print(co_occurrence_numbers.to_string())

@@ -5,6 +5,7 @@
 - sorted in the descending order of count. (Khong phai support)
 '''
 
+from typing import Dict, Tuple
 from ptf.prefix_partitioning import PrefixPartitioning
 from ptf.transaction_db import TransactionDB
 
@@ -17,10 +18,7 @@ class CoOccurrenceNumbers:
 
     def compute_co_occurrence_numbers(self):
         partition_con_dict = self._build_partition_con()
-        global_con = self._merge_partition_con(partition_con_dict)
-        # NOTE: x[1] la xep theo cai count. descending
-        sorted_con = sorted(global_con, key=lambda x: x[1], reverse=True)
-        return sorted_con
+        return self._merge_partition_con(partition_con_dict)
 
     def _build_partition_con(self):
         '''
@@ -53,10 +51,10 @@ class CoOccurrenceNumbers:
     def _merge_partition_con(self, partition_con_dict):
         '''
         input: { prefix: {item: count, ...}, ...
-        output: [(itemset, count), ...]}
+        output: [ prefix: [(itemset, count), ...]]}
         '''
 
-        global_con = []
+        CoN: Dict[int, Tuple[int, int]] = {}
 
         for prefix, con_i in partition_con_dict.items():
             for item, count in con_i.items():
@@ -65,5 +63,21 @@ class CoOccurrenceNumbers:
                 else:
                     itemset = set([prefix, item])
 
-                global_con.append((itemset, count))
-        return global_con
+                if prefix not in CoN:
+                    CoN[prefix] = []
+                CoN[prefix].append((itemset, count))
+
+        # Orderrihg each items in descending order of count
+        # x[1] la count
+        for prefix, con_list in CoN.items():
+            con_list.sort(key=lambda x: x[1], reverse=True)
+            CoN[prefix] = con_list
+        return CoN
+
+    def to_string(self):
+        result = ""
+        for prefix, con_list in self.co_occurrence_numbers.items():
+            result += f"Prefix {prefix}:\n"
+            for itemset, count in con_list:
+                result += f"Item {itemset}: Count {count}\n"
+        return result

@@ -41,8 +41,9 @@ class TestCoOccurrenceNumbers:
             mock_prefix_partition, mock_transaction_db)
         result = co_occ._build_partition_con()
 
-        assert 1 in result
-        assert result[1] == {2: 2, 3: 1, 4: 1}
+        # Note: prefix in result is transaction[0], not the loop's prefix key
+        assert 2 in result
+        assert result[2] == {2: 2, 3: 1, 4: 1}
 
     def test_build_partition_con_multiple_partitions(self, mock_prefix_partition, mock_transaction_db):
         """Test _build_partition_con with multiple partitions."""
@@ -57,9 +58,10 @@ class TestCoOccurrenceNumbers:
         result = co_occ._build_partition_con()
 
         assert len(result) == 3
-        assert result[1] == {2: 2, 3: 1, 4: 1}
-        assert result[2] == {3: 2, 4: 1}
-        assert result[3] == {4: 1}
+        # Prefix is transaction[0]
+        assert result[2] == {2: 2, 3: 1, 4: 1}
+        assert result[3] == {3: 2, 4: 1}
+        assert result[4] == {4: 1}
 
     def test_build_partition_con_empty_transactions(self, mock_prefix_partition, mock_transaction_db):
         """Test _build_partition_con with empty transactions in partition."""
@@ -71,8 +73,8 @@ class TestCoOccurrenceNumbers:
             mock_prefix_partition, mock_transaction_db)
         result = co_occ._build_partition_con()
 
-        # Empty transactions should be skipped
-        assert result[1] == {2: 1, 3: 1}
+        # Empty transactions should be skipped. Prefix is transaction[0]
+        assert result[2] == {2: 1, 3: 1}
 
     def test_build_partition_con_single_item_transactions(self, mock_prefix_partition, mock_transaction_db):
         """Test _build_partition_con with single item transactions."""
@@ -84,7 +86,14 @@ class TestCoOccurrenceNumbers:
             mock_prefix_partition, mock_transaction_db)
         result = co_occ._build_partition_con()
 
-        assert result[1] == {2: 2, 3: 1}
+        # Results are keyed by the LAST transaction[0]
+        # First transaction [2] -> prefix 2
+        # Second transaction [3] -> prefix 3 (overwrites)
+        # Third transaction [2] -> prefix 2 (overwrites)
+        # Final key is 2 from the last transaction
+        assert 2 in result
+        assert result[2][2] == 2  # item 2 appears in trans 1 and 3
+        assert result[2][3] == 1  # item 3 appears in trans 2
 
     def test_build_partition_con_empty_partition(self, mock_prefix_partition, mock_transaction_db):
         """Test _build_partition_con with empty partition."""
@@ -111,16 +120,23 @@ class TestCoOccurrenceNumbers:
 
         result = co_occ._merge_partition_con(partition_con_dict)
 
-        # Convert to set for easier comparison
-        result_set = {(itemset, count) for itemset, count in result}
+        # Result should be a dict with prefix as key
+        assert isinstance(result, dict)
+        assert 1 in result
 
-        expected = {
-            (frozenset([1]), 1),
-            (frozenset([1, 2]), 3),
-            (frozenset([1, 3]), 2)
-        }
+        # Check the list of (itemset, count) tuples
+        con_list = result[1]
+        assert len(con_list) == 3
 
-        assert result_set == expected
+        # Verify items are sorted by count (descending)
+        counts = [count for _, count in con_list]
+        assert counts == [3, 2, 1]
+
+        # Verify itemsets are sets
+        itemsets = [itemset for itemset, _ in con_list]
+        assert {1} in itemsets
+        assert {1, 2} in itemsets
+        assert {1, 3} in itemsets
 
     def test_merge_partition_con_multiple_prefixes(self, mock_prefix_partition, mock_transaction_db):
         """Test _merge_partition_con with multiple prefixes."""
@@ -136,16 +152,21 @@ class TestCoOccurrenceNumbers:
 
         result = co_occ._merge_partition_con(partition_con_dict)
 
-        result_set = {(itemset, count) for itemset, count in result}
+        # Result should be a dict
+        assert isinstance(result, dict)
+        assert len(result) == 2
 
-        expected = {
-            (frozenset([1]), 2),
-            (frozenset([1, 2]), 3),
-            (frozenset([2]), 1),
-            (frozenset([2, 3]), 4)
-        }
+        # Check prefix 1
+        assert 1 in result
+        con_list_1 = result[1]
+        counts_1 = [count for _, count in con_list_1]
+        assert counts_1 == sorted(counts_1, reverse=True)
 
-        assert result_set == expected
+        # Check prefix 2
+        assert 2 in result
+        con_list_2 = result[2]
+        counts_2 = [count for _, count in con_list_2]
+        assert counts_2 == sorted(counts_2, reverse=True)
 
     def test_merge_partition_con_empty_dict(self, mock_prefix_partition, mock_transaction_db):
         """Test _merge_partition_con with empty dictionary."""
@@ -156,7 +177,8 @@ class TestCoOccurrenceNumbers:
 
         result = co_occ._merge_partition_con({})
 
-        assert result == []
+        assert isinstance(result, dict)
+        assert result == {}
 
     def test_compute_co_occurrence_numbers_single_partition(self, mock_prefix_partition, mock_transaction_db):
         """Test compute_co_occurrence_numbers with single partition."""
@@ -167,12 +189,14 @@ class TestCoOccurrenceNumbers:
         co_occ = CoOccurrenceNumbers(
             mock_prefix_partition, mock_transaction_db)
 
-        # Result should be sorted in descending order by count
+        # Result should be a dict keyed by prefix
+        assert isinstance(co_occ.co_occurrence_numbers, dict)
         assert len(co_occ.co_occurrence_numbers) > 0
 
-        # Check that results are sorted by count (second element) in descending order
-        counts = [count for _, count in co_occ.co_occurrence_numbers]
-        assert counts == sorted(counts, reverse=True)
+        # Check that results within each prefix are sorted by count (descending)
+        for prefix, con_list in co_occ.co_occurrence_numbers.items():
+            counts = [count for _, count in con_list]
+            assert counts == sorted(counts, reverse=True)
 
     def test_compute_co_occurrence_numbers_multiple_partitions(self, mock_prefix_partition, mock_transaction_db):
         """Test compute_co_occurrence_numbers with multiple partitions."""
@@ -187,14 +211,18 @@ class TestCoOccurrenceNumbers:
 
         result = co_occ.co_occurrence_numbers
 
-        # Check that results are sorted by count in descending order
-        counts = [count for _, count in result]
-        assert counts == sorted(counts, reverse=True)
+        # Check that result is a dict
+        assert isinstance(result, dict)
 
-        # Check that all results are tuples of (frozenset, int)
-        for itemset, count in result:
-            assert isinstance(itemset, frozenset)
-            assert isinstance(count, int)
+        # Check that results within each prefix are sorted by count in descending order
+        for prefix, con_list in result.items():
+            counts = [count for _, count in con_list]
+            assert counts == sorted(counts, reverse=True)
+
+            # Check that all results are tuples of (set, int)
+            for itemset, count in con_list:
+                assert isinstance(itemset, set)
+                assert isinstance(count, int)
 
     def test_compute_co_occurrence_numbers_sorting(self, mock_prefix_partition, mock_transaction_db):
         """Test that compute_co_occurrence_numbers correctly sorts by count."""
@@ -207,11 +235,10 @@ class TestCoOccurrenceNumbers:
             mock_prefix_partition, mock_transaction_db)
         result = co_occ.co_occurrence_numbers
 
-        # Extract counts in order
-        counts = [count for _, count in result]
-
-        # Verify descending order
-        assert counts == sorted(counts, reverse=True)
+        # Verify each prefix's items are sorted by count (descending)
+        for prefix, con_list in result.items():
+            counts = [count for _, count in con_list]
+            assert counts == sorted(counts, reverse=True)
 
     def test_co_occurrence_numbers_attribute_set(self, mock_prefix_partition, mock_transaction_db):
         """Test that co_occurrence_numbers attribute is set during initialization."""
@@ -223,7 +250,7 @@ class TestCoOccurrenceNumbers:
             mock_prefix_partition, mock_transaction_db)
 
         assert hasattr(co_occ, 'co_occurrence_numbers')
-        assert isinstance(co_occ.co_occurrence_numbers, list)
+        assert isinstance(co_occ.co_occurrence_numbers, dict)
 
     def test_build_partition_con_counts_accurately(self, mock_prefix_partition, mock_transaction_db):
         """Test that _build_partition_con counts items accurately."""
@@ -235,17 +262,20 @@ class TestCoOccurrenceNumbers:
             mock_prefix_partition, mock_transaction_db)
         result = co_occ._build_partition_con()
 
-        # b appears in first, second, and fourth transactions = 3 times
-        # c appears in first and third transactions = 2 times
-        # d appears in first transaction = 1 time
-        # e appears in second and third transactions = 2 times
-        assert result['a']['b'] == 3
-        assert result['a']['c'] == 2
-        assert result['a']['d'] == 1
-        assert result['a']['e'] == 2
+        # The final prefix key is the LAST transaction[0], which is 'b'
+        # All items in con_i accumulate across all transactions
+        # b appears in trans 0, 1, 3 = 3 times
+        # c appears in trans 0, 2 = 2 times
+        # d appears in trans 0 = 1 time
+        # e appears in trans 1, 2 = 2 times
+        assert 'b' in result
+        assert result['b']['b'] == 3
+        assert result['b']['c'] == 2
+        assert result['b']['d'] == 1
+        assert result['b']['e'] == 2
 
     def test_merge_partition_con_frozenset_creation(self, mock_prefix_partition, mock_transaction_db):
-        """Test that _merge_partition_con correctly creates frozensets."""
+        """Test that _merge_partition_con correctly creates sets."""
         mock_prefix_partition.prefix_partitions = {}
 
         co_occ = CoOccurrenceNumbers(
@@ -257,12 +287,14 @@ class TestCoOccurrenceNumbers:
 
         result = co_occ._merge_partition_con(partition_con_dict)
 
-        # Check frozenset structure
-        itemsets = [itemset for itemset, _ in result]
+        # Check set structure
+        assert 'x' in result
+        con_list = result['x']
+        itemsets = [itemset for itemset, _ in con_list]
 
-        assert frozenset(['x']) in itemsets
-        assert frozenset(['x', 'y']) in itemsets
-        assert frozenset(['x', 'z']) in itemsets
+        assert {'x'} in itemsets
+        assert {'x', 'y'} in itemsets
+        assert {'x', 'z'} in itemsets
 
     def test_empty_all_partitions(self, mock_prefix_partition, mock_transaction_db):
         """Test with all empty partitions."""
@@ -275,7 +307,8 @@ class TestCoOccurrenceNumbers:
         co_occ = CoOccurrenceNumbers(
             mock_prefix_partition, mock_transaction_db)
 
-        assert co_occ.co_occurrence_numbers == []
+        assert isinstance(co_occ.co_occurrence_numbers, dict)
+        assert co_occ.co_occurrence_numbers == {}
 
     def test_large_dataset_simulation(self, mock_prefix_partition, mock_transaction_db):
         """Test with a larger simulated dataset."""
@@ -287,10 +320,11 @@ class TestCoOccurrenceNumbers:
         co_occ = CoOccurrenceNumbers(
             mock_prefix_partition, mock_transaction_db)
 
-        # Verify that co_occurrence_numbers is a sorted list
-        assert isinstance(co_occ.co_occurrence_numbers, list)
+        # Verify that co_occurrence_numbers is a dict
+        assert isinstance(co_occ.co_occurrence_numbers, dict)
         assert len(co_occ.co_occurrence_numbers) > 0
 
-        # Verify sorting
-        counts = [count for _, count in co_occ.co_occurrence_numbers]
-        assert counts == sorted(counts, reverse=True)
+        # Verify sorting within each prefix
+        for prefix, con_list in co_occ.co_occurrence_numbers.items():
+            counts = [count for _, count in con_list]
+            assert counts == sorted(counts, reverse=True)

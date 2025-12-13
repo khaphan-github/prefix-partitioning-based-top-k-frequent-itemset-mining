@@ -28,3 +28,11 @@ class PrefixPartitioning:
                     prefix_partitions[prefix].append(suffix)
 
         return prefix_partitions
+    
+    def to_string(self):
+        result = ""
+        for prefix, suffixes in self.prefix_partitions.items():
+            result += f"Prefix: {prefix}\n"
+            for suffix in suffixes:
+                result += f"  Suffix: {suffix}\n"
+        return result
