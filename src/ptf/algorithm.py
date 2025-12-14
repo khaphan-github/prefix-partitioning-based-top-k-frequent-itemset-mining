@@ -10,62 +10,48 @@ from ptf.hybrid_vertical_storage.sgl_partition_hybrid_candidate_pruning import S
 
 
 class PrefixPartitioningbasedTopKAlgorithm:
-    def __init__(self, top_k: int, use_hybrid_storage: bool = True, use_candidate_pruning: bool = False):
+    def __init__(self, k: int, partitionClass):
         """
-        Initialize PTF algorithm with optional enhancements.
-        
+        Initialize PTF algorithm with specified partition class.
+
         Args:
-            top_k: Number of top-k frequent itemsets to find
-            use_hybrid_storage: If True, use hybrid vertical storage (tid-list/dif-list/bit-vector).
-                               If False, use traditional list-based storage.
-                               Default: True (recommended)
-            use_candidate_pruning: If True, use Candidate Pruning (timeliness + last-item).
-                                  Only applies when use_hybrid_storage=True.
-                                  Default: False
+            k: Number of top-k frequent itemsets to find
+            partitionClass: Partition processor class (SglPartition, SglPartitionHybrid, or SglPartitionHybridCandidatePruning)
         """
-        self.top_k = top_k
-        self.use_hybrid_storage = use_hybrid_storage
-        self.use_candidate_pruning = use_candidate_pruning and use_hybrid_storage
-        
-        # Select partition processor based on configuration
-        if use_candidate_pruning:
-            self.partition_processor = SglPartitionHybridCandidatePruning
-        elif use_hybrid_storage:
-            self.partition_processor = SglPartitionHybrid
-        else:
-            self.partition_processor = SglPartition
-        
-        # Track top-2 itemsets for last-item pruning
+        self.top_k = k
+        self.partition_processor = partitionClass
+
+        # Track top-2 itemsets for last-item pruning (used by candidate pruning variant)
         self.top2_set: Set[frozenset] = set()
 
     def initialize_mh_and_rmsup(self, con_list: List[Tuple[set, int]]):
-        '''
-        Min heap lay top k item trong co-occurrence list
-        rmsub la item dau tien.
-        
-        Also extracts top-2 itemsets for candidate pruning.
-        '''
+         '''
+         Min heap lay top k item trong co-occurrence list
+         rmsub la item dau tien.
 
-        min_heap = MinHeapTopK(self.top_k)
+         Also extracts top-2 itemsets for candidate pruning.
+         '''
 
-        for con in range(min(self.top_k, len(con_list))):
-            itemset, support = con_list[con]
-            min_heap.insert(support=support, itemset=tuple(itemset))
-        rmsup = min_heap.min_support()
-        
-        # Extract top-2 itemsets for last-item pruning if using candidate pruning
-        if self.use_candidate_pruning:
-            self.top2_set = self._extract_top2_itemsets(min_heap)
+         min_heap = MinHeapTopK(self.top_k)
 
-        return min_heap, rmsup
+         for con in range(min(self.top_k, len(con_list))):
+             itemset, support = con_list[con]
+             min_heap.insert(support=support, itemset=tuple(itemset))
+         rmsup = min_heap.min_support()
+
+         # Extract top-2 itemsets for last-item pruning if using candidate pruning
+         if self.partition_processor == SglPartitionHybridCandidatePruning:
+             self.top2_set = self._extract_top2_itemsets(min_heap)
+
+         return min_heap, rmsup
 
     def build_promissing_item_arrays(self, min_heap: MinHeapTopK, all_items, con_map: dict, rmsup: int):
         '''
         Build promising items arrays with refinement.
-        
+
         Step 1: Add items from min_heap (1-itemset and 2-itemset)
         Step 2: Refine: Keep only items with sufficient support
-        
+
         output:  {item: [promising_items], ...}
         '''
         promising_items_arr = {}
@@ -96,11 +82,11 @@ class PrefixPartitioningbasedTopKAlgorithm:
                 else:
                     # Check support of 2-itemset {x_i, y}
                     sup = con_map.get(frozenset([x_i, y]), 0)
-                
+
                 # Keep item only if support >= rmsup
                 if sup >= rmsup:
                     new_arr.append(y)
-            
+
             promising_items_arr[x_i] = sorted(set(new_arr))
 
         return promising_items_arr
@@ -113,7 +99,7 @@ class PrefixPartitioningbasedTopKAlgorithm:
         1. Remove non-promising items based on support threshold
         2. Skip if |AR_i| <= 2
         3. Otherwise, build vertical representation and process the partition
-        
+
         Returns:
             Tuple (min_heap, rmsup): Updated heap and minimum support threshold
         '''
@@ -136,13 +122,13 @@ class PrefixPartitioningbasedTopKAlgorithm:
             if len(promissing_arr[partition]) <= 2:
                 continue
 
-            # Process the partition with partition data
+        # Process the partition with partition data
             if partitioner and hasattr(partitioner, 'prefix_partitions'):
                 partition_data = partitioner.prefix_partitions.get(partition, [])
 
                 # Process the partition using selected processor
                 # (vertical representation built inside execute)
-                if self.use_candidate_pruning:
+                if self.partition_processor == SglPartitionHybridCandidatePruning:
                     # Use candidate pruning version that tracks top2_set
                     min_heap, rmsup, self.top2_set = self.partition_processor.execute(
                         partition_item=partition,

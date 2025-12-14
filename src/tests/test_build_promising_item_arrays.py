@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from ptf.algorithm import PrefixPartitioningbasedTopKAlgorithm
+from ptf.sgl_partition import SglPartition
 from ptf.min_heap import MinHeapTopK
 
 
@@ -9,7 +10,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_basic(self):
         """Test build_promissing_item_arrays with basic input."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         # Create a mock min heap with some items
         mh = Mock(spec=MinHeapTopK)
@@ -33,7 +34,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_empty_heap(self):
         """Test with an empty heap."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         mh = Mock(spec=MinHeapTopK)
         mh.get_all.return_value = []
@@ -52,7 +53,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_single_items_only(self):
         """Test with only single items in the heap."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         mh = Mock(spec=MinHeapTopK)
         mh.get_all.return_value = [
@@ -75,7 +76,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_pairs_only(self):
         """Test with only pair itemsets in the heap."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         mh = Mock(spec=MinHeapTopK)
         mh.get_all.return_value = [
@@ -105,7 +106,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_mixed_items(self):
         """Test with mixed single and pair itemsets."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=5)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=5, partitionClass=SglPartition)
 
         mh = Mock(spec=MinHeapTopK)
         mh.get_all.return_value = [
@@ -138,7 +139,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_duplicate_pairs(self):
         """Test when same pair appears multiple times."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         mh = Mock(spec=MinHeapTopK)
         mh.get_all.return_value = [
@@ -159,7 +160,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_large_itemsets(self):
         """Test with larger itemset (should be ignored, only 1 and 2 element sets)."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         mh = Mock(spec=MinHeapTopK)
         mh.get_all.return_value = [
@@ -182,7 +183,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_return_type(self):
         """Test that the return type is correct."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         mh = Mock(spec=MinHeapTopK)
         mh.get_all.return_value = [
@@ -206,7 +207,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_all_items_initialized(self):
         """Test that all items in all_items are initialized in result."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         mh = Mock(spec=MinHeapTopK)
         mh.get_all.return_value = [
@@ -228,7 +229,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_high_support_values(self):
         """Test with high support values."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         mh = Mock(spec=MinHeapTopK)
         mh.get_all.return_value = [
@@ -253,7 +254,7 @@ class TestBuildPromisingItemArrays:
 
     def test_build_promising_item_arrays_with_real_heap(self):
         """Test with a real MinHeapTopK instance."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         # Create a real MinHeapTopK and populate it
         mh = MinHeapTopK(k=3)

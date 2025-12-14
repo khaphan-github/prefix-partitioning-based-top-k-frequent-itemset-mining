@@ -10,7 +10,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_basic(self):
         """Test filter_partitions with basic input."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         # Setup inputs
         promising_arr = {1: [1, 2], 2: [2, 3], 3: [3]}
@@ -28,7 +28,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_empty_partitions(self):
         """Test with empty partitions list."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2], 2: [2, 3]}
         partitions = []
@@ -46,7 +46,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_single_item_below_rmsup(self):
         """Test when single item has support below rmsup."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2], 2: []}
         partitions = [1]
@@ -63,7 +63,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_single_item_above_rmsup(self):
         """Test when single item has support above rmsup."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2]}
         partitions = [1]
@@ -80,7 +80,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_pair_below_rmsup(self):
         """Test when pair support is below rmsup."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [2], 2: []}
         partitions = [1]
@@ -96,7 +96,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_pair_above_rmsup(self):
         """Test when pair support is above rmsup."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [2], 2: []}
         partitions = [1]
@@ -112,7 +112,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_missing_con_map_entry(self):
         """Test when con_map doesn't contain an entry (defaults to 0)."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2], 2: []}
         partitions = [1]
@@ -129,7 +129,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_sgl_partition_called_for_large_lists(self):
         """Test that SglPartition.execute is called when promising items > 2."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2, 3, 4], 2: []}  # 4 items > 2
         partitions = [1]
@@ -146,7 +146,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_sgl_partition_not_called_for_small_lists(self):
         """Test that SglPartition.execute is NOT called when promising items <= 2."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2], 2: []}  # 2 items <= 2
         partitions = [1]
@@ -163,7 +163,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_multiple_partitions(self):
         """Test with multiple partitions."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2], 2: [2, 3], 3: [3]}
         partitions = [1, 2, 3]
@@ -183,7 +183,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_item_less_than_partition_not_removed(self):
         """Test that items < partition are not removed (only > partition are checked)."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         # Item 1 is less than partition 2, so it should not be checked for pair removal
         promising_arr = {2: [1], 3: []}
@@ -200,7 +200,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_break_on_single_item_match(self):
         """Test that loop breaks when single item matches partition."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2, 3], 2: []}
         partitions = [1]
@@ -217,7 +217,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_rmsup_zero(self):
         """Test with rmsup = 0."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2], 2: []}
         partitions = [1]
@@ -234,7 +234,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_large_support_values(self):
         """Test with large support values."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2], 2: []}
         partitions = [1]
@@ -251,7 +251,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_preserves_other_items(self):
         """Test that filtering one partition doesn't affect others."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2], 2: [2, 3], 3: [3]}
         partitions = [1, 2, 3]
@@ -276,7 +276,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_modifies_in_place(self):
         """Test that filter_partitions modifies the promising_arr in place."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         original_dict = {1: [1, 2], 2: []}
         promising_arr = original_dict
@@ -294,7 +294,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_multiple_items_with_mixed_support(self):
         """Test with multiple promising items and mixed support values."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [2, 3, 4], 2: []}
         partitions = [1]
@@ -317,7 +317,7 @@ class TestFilterPartitions:
 
     def test_filter_partitions_sgl_partition_called_with_correct_args(self):
         """Test that SglPartition.execute is called with correct arguments."""
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=3)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=3, partitionClass=SglPartition)
 
         promising_arr = {1: [1, 2, 3, 4, 5], 2: []}
         partitions = [1]

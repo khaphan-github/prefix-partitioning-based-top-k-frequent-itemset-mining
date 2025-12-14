@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from ptf.algorithm import PrefixPartitioningbasedTopKAlgorithm
+from ptf.sgl_partition import SglPartition
 from ptf.min_heap import MinHeapTopK
 
 
@@ -10,7 +11,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialization(self):
         """Test that the algorithm initializes correctly with a given top_k value."""
         top_k = 5
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         assert algo.top_k == top_k
         assert isinstance(algo.top_k, int)
@@ -18,13 +19,13 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialization_with_different_k_values(self):
         """Test initialization with various top_k values."""
         for k in [1, 5, 10, 100, 1000]:
-            algo = PrefixPartitioningbasedTopKAlgorithm(top_k=k)
+            algo = PrefixPartitioningbasedTopKAlgorithm(k=k, partitionClass=SglPartition)
             assert algo.top_k == k
 
     def test_initialize_mh_and_rmsup_basic(self):
         """Test initialize_mh_and_rmsup with a basic input."""
         top_k = 3
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         # Create a con_list with support values
         con_list = [
@@ -48,7 +49,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_heap_size(self):
         """Test that the heap maintains exactly top_k items."""
         top_k = 3
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 5),
@@ -66,7 +67,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_inserts_first_top_k(self):
         """Test that only the first top_k items are inserted."""
         top_k = 2
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({0}, 1),    # index 0, inserted
@@ -87,7 +88,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_correct_support_values(self):
         """Test that support values are correctly maintained in the heap."""
         top_k = 2
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 5),
@@ -108,7 +109,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_rmsup_value(self):
         """Test that rmsup (minimum support in heap) is correct."""
         top_k = 3
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 5),
@@ -128,7 +129,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_empty_con_list_after_top_k(self):
         """Test when con_list has fewer items than top_k."""
         top_k = 5
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 10),
@@ -144,7 +145,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_all_same_support(self):
         """Test with con_list items having same support values."""
         top_k = 2
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 5),
@@ -161,7 +162,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_single_item_in_con_list(self):
         """Test with only one item in con_list."""
         top_k = 3
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [({1}, 10)]
 
@@ -174,7 +175,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_large_con_list(self):
         """Test with a large con_list to ensure scalability."""
         top_k = 10
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         # Create a large con_list
         con_list = [({i}, 100 - i) for i in range(100)]
@@ -187,7 +188,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_with_tuple_itemsets(self):
         """Test that itemsets are correctly converted to tuples."""
         top_k = 2
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1, 2}, 5),
@@ -204,7 +205,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_returns_tuple(self):
         """Test that the function returns a tuple of (min_heap, rmsup)."""
         top_k = 2
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 5),
@@ -223,7 +224,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_returns_correct_values(self):
         """Test that the function returns correct min_heap and rmsup values."""
         top_k = 2
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 5),
@@ -242,7 +243,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_descending_supports(self):
         """Test with descending support values."""
         top_k = 3
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 1),
@@ -264,7 +265,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_ascending_supports(self):
         """Test with ascending support values."""
         top_k = 3
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 1),
@@ -285,7 +286,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_initialize_mh_and_rmsup_with_complex_itemsets(self):
         """Test with complex multi-item itemsets."""
         top_k = 2
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         con_list = [
             ({1}, 5),
@@ -304,7 +305,7 @@ class TestPrefixPartitioningbasedTopKAlgorithm:
     def test_algorithm_state_after_initialization(self):
         """Test that algorithm maintains correct state after initialization."""
         top_k = 3
-        algo = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+        algo = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartition)
 
         assert hasattr(algo, 'top_k')
         assert algo.top_k == top_k

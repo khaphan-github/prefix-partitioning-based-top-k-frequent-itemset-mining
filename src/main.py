@@ -2,6 +2,8 @@ from ptf.transaction_db import TransactionDB
 from ptf.prefix_partitioning import PrefixPartitioning
 from ptf.co_occurrence_numbers import CoOccurrenceNumbers
 from ptf.algorithm import PrefixPartitioningbasedTopKAlgorithm
+from ptf.sgl_partition import SglPartition
+from ptf.hybrid_vertical_storage.sgl_partition_hybrid import SglPartitionHybrid
 from ptf.utils import ExecutionTimer, measure_execution_time, show_progress
 
 
@@ -23,7 +25,7 @@ def run_ptf_algorithm(file_path: str, top_k: int = 8, output_file=None):
     co_occurrence_numbers = CoOccurrenceNumbers(partitioner, db)
 
     # Main algorithm
-    ptf = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k, use_hybrid_storage=True)
+    ptf = PrefixPartitioningbasedTopKAlgorithm(k=top_k, partitionClass=SglPartitionHybrid)
     min_heap, rmsup = ptf.initialize_mh_and_rmsup(
         co_occurrence_numbers.full_co_occurrence_list)
 
