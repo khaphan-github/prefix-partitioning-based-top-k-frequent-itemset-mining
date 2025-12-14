@@ -1,0 +1,7 @@
+{
+  "top_k": 8,
+  "parallel": false,
+  "input_dataset_path": "data/sample.txt",
+  "output_report": "reports/dataset-a/",
+  "save_metrics": true
+}

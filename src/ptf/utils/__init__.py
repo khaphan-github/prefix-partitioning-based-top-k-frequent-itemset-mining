@@ -6,6 +6,8 @@ from .execute_with_timing_and_progress import execute_with_timing_and_progress
 from .execution_timer import ExecutionTimer
 from .write_output import write_output
 from .execution_metrics import ExecutionMetrics, track_execution
+from .metrics_reporter import MetricsReporter
+from .metrics_analyzer import MetricsAnalyzer
 
 __all__ = [
     "measure_execution_time",
@@ -15,4 +17,6 @@ __all__ = [
     "write_output",
     "ExecutionMetrics",
     "track_execution",
+    "MetricsReporter",
+    "MetricsAnalyzer",
 ]

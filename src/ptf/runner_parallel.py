@@ -12,7 +12,7 @@ from ptf.transaction_db import TransactionDB
 from ptf.prefix_partitioning import PrefixPartitioning
 from ptf.co_occurrence_numbers import CoOccurrenceNumbers
 from ptf.algorithm_parallel import PrefixPartitioningbasedTopKAlgorithmParallel
-from ptf.utils import write_output, track_execution
+from ptf.utils import write_output, track_execution, MetricsReporter
 
 
 def run_ptf_algorithm_parallel(
@@ -87,8 +87,8 @@ def run_ptf_algorithm_parallel(
 
     # Generate execution report (after metrics are finalized)
     write_output(
-        f"Execution time: {metrics.execution_time:.4f} seconds", output_file)
-    write_output(f"Memory used: {metrics.memory_used:.2f} MB", output_file)
+        f"Execution time: {metrics.execution_time_ms:.2f} ms", output_file)
+    write_output(f"Memory used: {metrics.memory_used_kb:.2f} KB", output_file)
 
     for rank, (support, itemset) in enumerate(final_results, 1):
         itemset_str = "{" + ", ".join(map(str, sorted(itemset))) + "}"
@@ -100,7 +100,8 @@ def run_ptf_algorithm_parallel_with_timing(
     file_path: str,
     top_k: int = 8,
     output_file=None,
-    num_workers: int = None
+    num_workers: int = None,
+    metrics_json: Optional[str] = None
 ) -> float:
     """
     Run parallel PTF algorithm and measure execution time.
@@ -110,6 +111,7 @@ def run_ptf_algorithm_parallel_with_timing(
         top_k: Number of top-k itemsets to find
         output_file: Optional file object to write results to
         num_workers: Number of threads. Default: os.cpu_count()
+        metrics_json: Optional JSON file path to save metrics report
 
     Returns:
         Execution time in seconds
@@ -118,11 +120,21 @@ def run_ptf_algorithm_parallel_with_timing(
         >>> exec_time = run_ptf_algorithm_parallel_with_timing("data.txt", top_k=8, num_workers=4)
         >>> print(f"Execution time: {exec_time:.4f}s")
     """
-    start_time = time.time()
-    run_ptf_algorithm_parallel(file_path, top_k, output_file, num_workers)
-    end_time = time.time()
+    with track_execution() as metrics:
+        start_time = time.time()
+        run_ptf_algorithm_parallel(file_path, top_k, output_file, num_workers)
+        end_time = time.time()
 
     execution_time = end_time - start_time
     write_output(f"Execution time: {execution_time:.4f} seconds", output_file)
+
+    if metrics_json:
+        MetricsReporter.save_metrics(
+            metrics,
+            metrics_json,
+            algorithm="PTF-Parallel",
+            top_k=top_k,
+            num_workers=num_workers
+        )
 
     return execution_time

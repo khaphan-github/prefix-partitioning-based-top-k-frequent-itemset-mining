@@ -5,7 +5,7 @@ from ptf.transaction_db import TransactionDB
 from ptf.prefix_partitioning import PrefixPartitioning
 from ptf.co_occurrence_numbers import CoOccurrenceNumbers
 from ptf.algorithm import PrefixPartitioningbasedTopKAlgorithm
-from ptf.utils import write_output, track_execution
+from ptf.utils import write_output, track_execution, MetricsReporter
 
 
 def run_ptf_algorithm(file_path: str, top_k: int = 8, output_file=None):
@@ -62,11 +62,11 @@ def run_ptf_algorithm(file_path: str, top_k: int = 8, output_file=None):
             write_output(f"{rank}. {itemset_str:20} => Support: {support}", output_file)
     
     # Generate execution report
-    write_output(f"Execution time: {metrics.execution_time:.4f} seconds", output_file)
-    write_output(f"Memory used: {metrics.memory_used:.2f} MB", output_file)
+    write_output(f"Execution time: {metrics.execution_time_ms:.2f} ms", output_file)
+    write_output(f"Memory used: {metrics.memory_used_kb:.2f} KB", output_file)
 
 
-def run_ptf_algorithm_with_timing(file_path: str, top_k: int = 8, output_file=None) -> float:
+def run_ptf_algorithm_with_timing(file_path: str, top_k: int = 8, output_file=None, metrics_json: Optional[str] = None) -> float:
     """
     Run PTF algorithm and measure execution time.
     
@@ -74,6 +74,7 @@ def run_ptf_algorithm_with_timing(file_path: str, top_k: int = 8, output_file=No
         file_path: Path to transaction database file
         top_k: Number of top-k itemsets to find
         output_file: Optional file object to write results to
+        metrics_json: Optional JSON file path to save metrics report
         
     Returns:
         Execution time in seconds
@@ -84,5 +85,15 @@ def run_ptf_algorithm_with_timing(file_path: str, top_k: int = 8, output_file=No
     
     execution_time = end_time - start_time
     write_output(f"Execution time: {execution_time:.4f} seconds", output_file)
+    
+    if metrics_json:
+        with track_execution() as metrics:
+            pass  # Metrics already captured above
+        MetricsReporter.save_metrics(
+            metrics,
+            metrics_json,
+            algorithm="PTF",
+            top_k=top_k
+        )
     
     return execution_time
