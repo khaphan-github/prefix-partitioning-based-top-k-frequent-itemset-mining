@@ -23,7 +23,7 @@ def run_ptf_algorithm(file_path: str, top_k: int = 8, output_file=None):
     co_occurrence_numbers = CoOccurrenceNumbers(partitioner, db)
 
     # Main algorithm
-    ptf = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k)
+    ptf = PrefixPartitioningbasedTopKAlgorithm(top_k=top_k, use_hybrid_storage=True)
     min_heap, rmsup = ptf.initialize_mh_and_rmsup(
         co_occurrence_numbers.full_co_occurrence_list)
 

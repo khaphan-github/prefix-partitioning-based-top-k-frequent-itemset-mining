@@ -5,11 +5,23 @@
 from typing import List, Tuple, Dict
 from ptf.min_heap import MinHeapTopK
 from ptf.sgl_partition import SglPartition
+from ptf.sgl_partition_hybrid import SglPartitionHybrid
 
 
 class PrefixPartitioningbasedTopKAlgorithm:
-    def __init__(self, top_k: int,):
+    def __init__(self, top_k: int, use_hybrid_storage: bool = True):
+        """
+        Initialize PTF algorithm with optional hybrid vertical storage.
+        
+        Args:
+            top_k: Number of top-k frequent itemsets to find
+            use_hybrid_storage: If True, use SglPartitionHybrid (optimized).
+                              If False, use traditional SglPartition.
+                              Default: True (recommended)
+        """
         self.top_k = top_k
+        self.use_hybrid_storage = use_hybrid_storage
+        self.partition_processor = SglPartitionHybrid if use_hybrid_storage else SglPartition
 
     def initialize_mh_and_rmsup(self, con_list: List[Tuple[set, int]]):
         '''
@@ -107,8 +119,9 @@ class PrefixPartitioningbasedTopKAlgorithm:
             if partitioner and hasattr(partitioner, 'prefix_partitions'):
                 partition_data = partitioner.prefix_partitions.get(partition, [])
 
-                # Process the partition (vertical representation built inside execute)
-                min_heap, rmsup = SglPartition.execute(
+                # Process the partition using selected processor
+                # (vertical representation built inside execute)
+                min_heap, rmsup = self.partition_processor.execute(
                     partition_item=partition,
                     promising_items=promissing_arr[partition],
                     partition_data=partition_data,
