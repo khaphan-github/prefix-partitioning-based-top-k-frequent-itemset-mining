@@ -62,10 +62,8 @@ def run_ptf_algorithm(file_path: str, top_k: int = 8, output_file=None):
             write_output(f"{rank}. {itemset_str:20} => Support: {support}", output_file)
     
     # Generate execution report
-    write_output("\n" + "=" * 60, output_file)
     write_output(f"Execution time: {metrics.execution_time:.4f} seconds", output_file)
     write_output(f"Memory used: {metrics.memory_used:.2f} MB", output_file)
-    write_output("=" * 60 + "\n", output_file)
 
 
 def run_ptf_algorithm_with_timing(file_path: str, top_k: int = 8, output_file=None) -> float:

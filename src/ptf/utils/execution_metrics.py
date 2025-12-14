@@ -27,14 +27,14 @@ class ExecutionMetrics:
     @property
     def execution_time(self):
         """Get execution time in seconds."""
-        if self.start_time and self.end_time:
+        if self.start_time is not None and self.end_time is not None:
             return self.end_time - self.start_time
         return None
     
     @property
     def memory_used(self):
         """Get memory used in MB."""
-        if self.start_memory and self.end_memory:
+        if self.start_memory is not None and self.end_memory is not None:
             return self.end_memory - self.start_memory
         return None
 

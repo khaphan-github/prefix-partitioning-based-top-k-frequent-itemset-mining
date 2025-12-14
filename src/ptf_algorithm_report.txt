@@ -1,0 +1,55 @@
+
+Test Case 1: top_k=8
+----------------------------------------
+Initial rmsup: 48258
+Initial MH size: 8
+
+Total itemsets found: 8
+Final rmsup: 48258
+
+Execution time: 20.9873 seconds
+Memory used: 1751.69 MB
+
+Test Case 2: top_k=5
+----------------------------------------
+Initial rmsup: 48470
+Initial MH size: 5
+
+Total itemsets found: 5
+Final rmsup: 48470
+
+Execution time: 20.1758 seconds
+Memory used: 1417.38 MB
+
+Test Case 3: top_k=10
+----------------------------------------
+Initial rmsup: 48156
+Initial MH size: 10
+
+Total itemsets found: 10
+Final rmsup: 48156
+
+Execution time: 22.2291 seconds
+Memory used: 1365.96 MB
+
+Test Case 4: top_k=3
+----------------------------------------
+Initial rmsup: 48572
+Initial MH size: 3
+
+Total itemsets found: 3
+Final rmsup: 48572
+
+Execution time: 22.6183 seconds
+Memory used: 1358.38 MB
+
+Test Case 5: top_k=20
+----------------------------------------
+Initial rmsup: 47781
+Initial MH size: 20
+
+Total itemsets found: 20
+Final rmsup: 47843
+
+Execution time: 21.5239 seconds
+Memory used: 1362.09 MB

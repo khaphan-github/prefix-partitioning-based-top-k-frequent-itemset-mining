@@ -1,0 +1,17 @@
+Initial rmsup: 3
+Initial MH size: 8
+
+Total itemsets found: 8
+Final rmsup: 7
+
+Execution time: 0.0022 seconds
+Memory used: 0.62 MB
+1. {2}                  => Support: 10
+2. {2}                  => Support: 10
+3. {10}                 => Support: 9
+4. {10}                 => Support: 9
+5. {2, 10}              => Support: 8
+6. {2, 10}              => Support: 8
+7. {9}                  => Support: 7
+8. {2, 9}               => Support: 7
+Execution time: 0.0024 seconds
