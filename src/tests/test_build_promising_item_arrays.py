@@ -20,8 +20,12 @@ class TestBuildPromisingItemArrays:
         ]
 
         all_items = [1, 2, 3]
+        con_map = {frozenset([1]): 10, frozenset([1, 2])
+                             : 8, frozenset([2, 3]): 6}
+        rmsup = 5
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # Verify the result is a dictionary
         assert isinstance(result, dict)
@@ -35,8 +39,11 @@ class TestBuildPromisingItemArrays:
         mh.get_all.return_value = []
 
         all_items = [1, 2, 3]
+        con_map = {}
+        rmsup = 1
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # All items should have empty promising items when heap is empty
         assert result[1] == []
@@ -55,8 +62,11 @@ class TestBuildPromisingItemArrays:
         ]
 
         all_items = [1, 2, 3]
+        con_map = {frozenset([1]): 10, frozenset([2]): 8, frozenset([3]): 6}
+        rmsup = 5
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # Single items should be added to their own promising list
         assert 1 in result[1]
@@ -76,7 +86,12 @@ class TestBuildPromisingItemArrays:
 
         all_items = [1, 2, 3]
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        con_map = {frozenset([1, 2]): 10, frozenset(
+            [2, 3]): 8, frozenset([1, 3]): 6}
+        rmsup = 5
+
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # Item 1 should have items 2 and 3 as promising
         assert 2 in result[1]
@@ -103,7 +118,14 @@ class TestBuildPromisingItemArrays:
 
         all_items = [1, 2, 3]
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        con_map = {
+            frozenset([1]): 10, frozenset([1, 2]): 9, frozenset([1, 3]): 8,
+            frozenset([2]): 7, frozenset([2, 3]): 6
+        }
+        rmsup = 5
+
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # Item 1 should have itself and items 2, 3
         assert 1 in result[1]
@@ -126,7 +148,11 @@ class TestBuildPromisingItemArrays:
 
         all_items = [1, 2, 3]
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        con_map = {frozenset([1, 2]): 10}
+        rmsup = 5
+
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # Item 1 should have item 2 (may appear twice if not deduplicated)
         assert 2 in result[1]
@@ -144,7 +170,11 @@ class TestBuildPromisingItemArrays:
 
         all_items = [1, 2, 3]
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        con_map = {frozenset([1, 2]): 9, frozenset([2]): 8}
+        rmsup = 5
+
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # Only single and 2-element itemsets should be processed
         assert 2 in result[1]  # From (1,2) pair
@@ -161,7 +191,11 @@ class TestBuildPromisingItemArrays:
 
         all_items = [1, 2, 3]
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        con_map = {frozenset([1, 2]): 10}
+        rmsup = 5
+
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # Verify return type is dict with list values
         assert isinstance(result, dict)
@@ -181,7 +215,11 @@ class TestBuildPromisingItemArrays:
 
         all_items = [1, 2, 3, 4, 5]
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        con_map = {frozenset([1, 2]): 10}
+        rmsup = 5
+
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # All items should be present in result
         for item in all_items:
@@ -201,7 +239,12 @@ class TestBuildPromisingItemArrays:
 
         all_items = [1, 2, 3]
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        con_map = {frozenset([1]): 1000, frozenset(
+            [1, 2]): 950, frozenset([2, 3]): 900}
+        rmsup = 500
+
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         assert isinstance(result, dict)
         assert 1 in result[1]
@@ -220,7 +263,11 @@ class TestBuildPromisingItemArrays:
 
         all_items = [1, 2, 3]
 
-        result = algo.build_promissing_item_arrays(mh, all_items)
+        con_map = {frozenset([1]): 10, frozenset([1, 2]): 9, frozenset([2]): 8}
+        rmsup = 5
+
+        result = algo.build_promissing_item_arrays(
+            mh, all_items, con_map, rmsup)
 
         # Verify result structure
         assert isinstance(result, dict)

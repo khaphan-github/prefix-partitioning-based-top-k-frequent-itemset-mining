@@ -61,7 +61,7 @@ class TestSglPartitionInitialization:
         min_heap = MinHeapTopK(k=5)
         rmsup = 1
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -84,7 +84,7 @@ class TestSglPartitionInitialization:
         min_heap = MinHeapTopK(k=5)
         rmsup = 2  # Only itemsets with support > 2 are added
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -102,7 +102,7 @@ class TestSglPartitionInitialization:
         min_heap = MinHeapTopK(k=5)
         rmsup = 1
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -129,7 +129,7 @@ class TestSglPartitionExpansion:
         min_heap = MinHeapTopK(k=10)
         rmsup = 3
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -157,7 +157,7 @@ class TestSglPartitionExpansion:
         min_heap = MinHeapTopK(k=10)
         rmsup = 1
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -186,7 +186,7 @@ class TestSglPartitionTermination:
         # Set high rmsup to trigger termination
         rmsup = 2
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -211,7 +211,7 @@ class TestSglPartitionTermination:
         min_heap.insert(support=4, itemset=(10,))  # Dummy high support
         rmsup_initial = min_heap.min_support()
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup_initial
         )
 
@@ -238,7 +238,7 @@ class TestSglPartitionTheorems:
         min_heap = MinHeapTopK(k=10)
         rmsup = 2
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -268,7 +268,7 @@ class TestSglPartitionTheorems:
         # High rmsup ensures immediate termination
         rmsup = 10
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -295,7 +295,7 @@ class TestSglPartitionIntegration:
         min_heap = MinHeapTopK(k=10)
         rmsup = 3  # Initial threshold from initialization
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -323,7 +323,7 @@ class TestSglPartitionIntegration:
         min_heap = MinHeapTopK(k=3)
         rmsup = 1
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -344,7 +344,7 @@ class TestSglPartitionIntegration:
         min_heap = MinHeapTopK(k=5)
         rmsup = 0
 
-        result = SglPartition.execute(
+        result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -372,7 +372,7 @@ class TestSglPartitionEdgeCases:
         min_heap = MinHeapTopK(k=5)
         rmsup = 2
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -392,7 +392,7 @@ class TestSglPartitionEdgeCases:
         min_heap = MinHeapTopK(k=10)
         rmsup = 5
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 
@@ -414,7 +414,7 @@ class TestSglPartitionEdgeCases:
         min_heap = MinHeapTopK(k=5)
         rmsup = 0
 
-        min_heap_result, rmsup_result = SglPartition.execute(
+        min_heap_result, rmsup_result = SglPartition.execute_with_tidsets(
             partition_item, promising_items, tidset_map, min_heap, rmsup
         )
 

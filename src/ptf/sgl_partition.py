@@ -36,7 +36,7 @@ class SglPartition:
         Args:
             partition_item: The prefix item x_i
             promising_items: List of promising items (AR_i) including prefix
-            partition_data: Transactions in partition P_i
+            partition_data: Transactions in partition P_i (raw list of lists)
             min_heap: Current top-k itemsets (MinHeapTopK object)
             rmsup: Current running minimum support threshold
             partition_size: Total transactions in partition (optional)
@@ -45,12 +45,72 @@ class SglPartition:
             Tuple of (updated_min_heap, updated_rmsup)
         '''
 
-        # Build vertical representation from partition data
+        # Build vertical representation from raw transaction data
         tidset_map, partition_size = SglPartition.build_vertical_representation(
             partition_data=partition_data,
             partition_item=partition_item,
             promising_arr=promising_items
         )
+
+        # Process using the internal method
+        return SglPartition._execute_with_tidsets(
+            partition_item=partition_item,
+            promising_items=promising_items,
+            tidset_map=tidset_map,
+            min_heap=min_heap,
+            rmsup=rmsup,
+            partition_size=partition_size
+        )
+
+    @staticmethod
+    def execute_with_tidsets(
+        partition_item: int,
+        promising_items: List[int],
+        tidset_map: Dict[int, List[int]],
+        min_heap: MinHeapTopK,
+        rmsup: int
+    ) -> Tuple[MinHeapTopK, int]:
+        '''
+        Execute Algorithm 2 with pre-computed tidset_map (for unit tests).
+
+        Args:
+            partition_item: The prefix item x_i
+            promising_items: List of promising items (AR_i) including prefix
+            tidset_map: Pre-computed vertical representation (dict mapping items to tid-sets)
+            min_heap: Current top-k itemsets (MinHeapTopK object)
+            rmsup: Current running minimum support threshold
+
+        Returns:
+            Tuple of (updated_min_heap, updated_rmsup)
+        '''
+        # Calculate partition_size from max TID + 1
+        all_tids = []
+        for tidset in tidset_map.values():
+            all_tids.extend(tidset)
+        partition_size = max(all_tids) + 1 if all_tids else 0
+
+        return SglPartition._execute_with_tidsets(
+            partition_item=partition_item,
+            promising_items=promising_items,
+            tidset_map=tidset_map,
+            min_heap=min_heap,
+            rmsup=rmsup,
+            partition_size=partition_size
+        )
+
+    @staticmethod
+    def _execute_with_tidsets(
+        partition_item: int,
+        promising_items: List[int],
+        tidset_map: Dict[int, List[int]],
+        min_heap: MinHeapTopK,
+        rmsup: int,
+        partition_size: int
+    ) -> Tuple[MinHeapTopK, int]:
+        '''
+        Internal method: Execute Algorithm 2 with tidset_map.
+        This is shared by both execute() and execute_with_tidsets()
+        '''
 
         # PHASE 1: Initialize 2-itemsets
         # ============================================================
