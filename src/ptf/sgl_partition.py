@@ -25,7 +25,7 @@ class SglPartition:
     def execute(
         partition_item: int,
         promising_items: List[int],
-        tidset_map: Dict[int, List[int]],
+        partition_data: List[List[int]],
         min_heap: MinHeapTopK,
         rmsup: int,
         partition_size: int = None
@@ -36,7 +36,7 @@ class SglPartition:
         Args:
             partition_item: The prefix item x_i
             promising_items: List of promising items (AR_i) including prefix
-            tidset_map: Mapping from item to tid-set (sorted lists of transaction IDs)
+            partition_data: Transactions in partition P_i
             min_heap: Current top-k itemsets (MinHeapTopK object)
             rmsup: Current running minimum support threshold
             partition_size: Total transactions in partition (optional)
@@ -44,6 +44,13 @@ class SglPartition:
         Returns:
             Tuple of (updated_min_heap, updated_rmsup)
         '''
+
+        # Build vertical representation from partition data
+        tidset_map, partition_size = SglPartition.build_vertical_representation(
+            partition_data=partition_data,
+            partition_item=partition_item,
+            promising_arr=promising_items
+        )
 
         # PHASE 1: Initialize 2-itemsets
         # ============================================================
@@ -150,13 +157,6 @@ class SglPartition:
 
         Both tid-sets should be pre-sorted in ascending order.
         Time complexity: O(n + m) where n, m are sizes of tid-sets
-
-        Args:
-            tidset1: Sorted list of transaction IDs
-            tidset2: Sorted list of transaction IDs
-
-        Returns:
-            Sorted list of transaction IDs in both tidset1 and tidset2
         '''
         result = []
         i, j = 0, 0
@@ -172,3 +172,41 @@ class SglPartition:
                 j += 1
 
         return result
+
+    @staticmethod
+    def build_vertical_representation(partition_data: List[List[int]], partition_item: int, promising_arr: List[int]) -> Tuple[Dict[int, List[int]], int]:
+        '''
+        Build vertical representation (tidsets) for items in a partition.
+
+        Input:
+            partition_data (List[List[int]]): Transactions in partition P_i
+            partition_item (int): The prefix item x_i
+            promising_arr (List[int]): Promising items for this partition
+
+        Output:
+            tidset_map (Dict): Mapping from item to tid-set (list of transaction IDs)
+            partition_size (int): Number of transactions in partition
+        '''
+        tidset_map = {}
+
+        # Initialize tidset for all promising items
+        for item in promising_arr:
+            if item != partition_item:
+                tidset_map[item] = []
+            else:
+                # Prefix item appears in all transactions
+                tidset_map[item] = list(range(len(partition_data)))
+
+        # Assign local TID and build tidsets
+        for local_tid, transaction in enumerate(partition_data):
+            for item in transaction:
+                if item in tidset_map and item != partition_item:
+                    tidset_map[item].append(local_tid)
+
+        # Sort tidsets for efficient intersection operations
+        for item in tidset_map:
+            tidset_map[item].sort()
+
+        partition_size = len(partition_data)
+
+        return tidset_map, partition_size

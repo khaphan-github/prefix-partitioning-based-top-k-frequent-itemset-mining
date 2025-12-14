@@ -48,8 +48,14 @@ class PrefixPartitioningbasedTopKAlgorithm:
 
         return promising_items_arr
 
-    def filter_partitions(self, promissing_arr: dict, partitions: List[int], min_heap: MinHeapTopK, con_map: dict, rmsup: int):
+    def filter_partitions(self, promissing_arr: dict, partitions: List[int], min_heap: MinHeapTopK, con_map: dict, rmsup: int, partitioner=None):
         '''
+        Filter partitions and process those that meet criteria.
+
+        For each partition:
+        1. Remove non-promising items based on support threshold
+        2. Skip if |AR_i| <= 2
+        3. Otherwise, build vertical representation and process the partition
         '''
         for partition in partitions:
             # Promising items in current partition
@@ -65,57 +71,19 @@ class PrefixPartitioningbasedTopKAlgorithm:
                     if pair_support <= rmsup:
                         promissing_arr[partition].remove(promissing_item)
 
+            # Skip partition if promising items <= 2
             if len(promissing_arr[partition]) <= 2:
                 continue
-            else:
+
+            # Process the partition with partition data
+            if partitioner and hasattr(partitioner, 'partitions'):
+                partition_data = partitioner.partitions.get(partition, [])
+
+                # Process the partition (vertical representation built inside execute)
                 SglPartition.execute(
                     partition_item=partition,
                     promising_items=promissing_arr[partition],
-                    tidset_map={},  # Will be populated with vertical representation
+                    partition_data=partition_data,
                     min_heap=min_heap,
                     rmsup=rmsup
                 )
-
-    def build_vertical_representation(self, partition_data: List[List[int]], partition_item: int, promising_arr: List[int]):
-        '''
-        Build vertical representation (tidsets) for items in a partition.
-
-        Input:
-            partition_data (List[List[int]]): Transactions in partition P_i
-            partition_item (int): The prefix item x_i
-            ar_i (List[int]): Promising items for this partition
-
-        Output:
-            vertical_rep (VerticalRepresentation): Vertical representation object with tidsets
-            tidset_map (Dict): Direct mapping from item to tid-set for algorithm efficiency
-
-        Process:
-            1. Assign local TID to each transaction in partition (0-indexed)
-            2. For each item in AR_i (excluding x_i):
-               a. Create tid-set as list of local TIDs containing that item
-               b. Sort tid-set in ascending order (for efficient intersection)
-            3. Store both in VerticalRepresentation and return direct tidset_map
-        '''
-        tidset_map = {}
-
-        # Initialize tidset for all promising items (excluding partition_item)
-        for item in promising_arr:
-            if item != partition_item:
-                tidset_map[item] = []
-            else:
-                # Prefix item appears in all transactions
-                tidset_map[item] = list(range(len(partition_data)))
-
-        # Assign local TID and build tidsets
-        for local_tid, transaction in enumerate(partition_data):
-            for item in transaction:
-                if item in tidset_map and item != partition_item:
-                    tidset_map[item].append(local_tid)
-
-        # Sort tidsets for efficient intersection operations
-        for item in tidset_map:
-            tidset_map[item].sort()
-
-        partition_size = len(partition_data)
-
-        return tidset_map, partition_size

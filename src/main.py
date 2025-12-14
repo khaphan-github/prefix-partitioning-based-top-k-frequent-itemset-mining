@@ -8,8 +8,8 @@ if __name__ == "__main__":
     '''
     - Read transaction database
     - Create prefix-based partitions
-    - Print summary of partitions
-    - 
+    - Run PTF algorithm
+    - Export final results
     '''
 
     # Read transaction database
@@ -22,21 +22,40 @@ if __name__ == "__main__":
     min_heap, rmsup = ptf.initialize_mh_and_rmsup(
         co_occurrence_numbers.full_co_occurrence_list)
 
-    assert rmsup == 3
-    assert len(min_heap.heap) == 8
+    print("=" * 60)
+    print("INITIAL STATE")
+    print("=" * 60)
+    print(f"Initial rmsup: {rmsup}")
+    print(f"Initial MH size: {len(min_heap.heap)}")
 
     promissing_arr = ptf.build_promissing_item_arrays(
         min_heap=min_heap,
         all_items=db.all_items,
     )
 
-    partitions_to_process = ptf.filter_partitions(
-        ar=promissing_arr,
-        all_items=db.all_items,
-        con_map=co_occurrence_numbers.con_map,
+    ptf.filter_partitions(
+        promissing_arr=promissing_arr,
+        partitions=db.all_items,
         min_heap=min_heap,
-        rmsup=rmsup
+        con_map=co_occurrence_numbers.con_map,
+        rmsup=rmsup,
+        partitioner=partitioner
     )
 
-    print("Partitions to process:", partitions_to_process)
-    print("Final results:", min_heap.get_all())
+    # Print final results
+    print("\n" + "=" * 60)
+    print("FINAL RESULTS (Top-k Frequent Itemsets)")
+    print("=" * 60)
+
+    final_results = min_heap.get_all()
+    # Sort by support descending
+    final_results.sort(key=lambda x: (-x[0], x[1]))
+
+    print(f"\nTotal itemsets found: {len(final_results)}")
+    print(f"Final rmsup: {min_heap.min_support()}\n")
+
+    for rank, (support, itemset) in enumerate(final_results, 1):
+        itemset_str = "{" + ", ".join(map(str, sorted(itemset))) + "}"
+        print(f"{rank}. {itemset_str:20} => Support: {support}")
+
+    print("\n" + "=" * 60)
