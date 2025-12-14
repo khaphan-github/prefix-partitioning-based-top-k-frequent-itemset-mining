@@ -1,0 +1,40 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-14T19:02:27.522779
+======================================================================
+
+Configuration:
+  Algorithm: Parallel PTF
+  Top-k: 20
+  Input Dataset: data/pumsb_spmf.txt
+  Workers: 4
+
+Initial rmsup: 47781
+Initial MH size: 20
+
+Total itemsets found: 20
+Final rmsup: 47843
+
+Execution time: 20210.95 ms
+Memory used: 1816412.00 KB
+1. {4439}               => Support: 48944
+2. {7063}               => Support: 48628
+3. {171}                => Support: 48572
+4. {4439, 7063}         => Support: 48529
+5. {171, 4439}          => Support: 48470
+6. {181}                => Support: 48258
+7. {185}                => Support: 48258
+8. {181, 185}           => Support: 48258
+9. {4429}               => Support: 48193
+10. {171, 7063}          => Support: 48156
+11. {181, 185, 4439}     => Support: 48156
+12. {181, 4439}          => Support: 48156
+13. {185, 4439}          => Support: 48156
+14. {4429, 4439}         => Support: 48091
+15. {171, 4439, 7063}    => Support: 48057
+16. {171, 181}           => Support: 47917
+17. {171, 181, 185}      => Support: 47917
+18. {171, 185}           => Support: 47917
+19. {4435}               => Support: 47866
+20. {185, 7063}          => Support: 47843
+Execution time: 21.6995 seconds

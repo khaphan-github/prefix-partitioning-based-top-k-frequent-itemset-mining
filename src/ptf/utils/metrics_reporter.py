@@ -18,7 +18,8 @@ class MetricsReporter:
         algorithm: str = "PTF",
         top_k: Optional[int] = None,
         total_itemsets: Optional[int] = None,
-        final_rmsup: Optional[int] = None
+        final_rmsup: Optional[int] = None,
+        **kwargs
     ):
         """
         Save execution metrics to JSON file.
@@ -30,6 +31,7 @@ class MetricsReporter:
             top_k: Top-k parameter
             total_itemsets: Total itemsets found
             final_rmsup: Final rmsup value
+            **kwargs: Additional parameters (e.g., num_workers, dataset_name)
         """
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -40,8 +42,15 @@ class MetricsReporter:
             }
         }
         
+        # Build parameters dict
+        params = {}
         if top_k is not None:
-            report["parameters"] = {"top_k": top_k}
+            params["top_k"] = top_k
+        # Add any additional kwargs to parameters
+        params.update({k: v for k, v in kwargs.items() if v is not None})
+        
+        if params:
+            report["parameters"] = params
         
         if total_itemsets is not None or final_rmsup is not None:
             report["results"] = {}

@@ -1,7 +1,7 @@
 {
-  "top_k": 8,
+  "top_k": 20,
   "parallel": false,
-  "input_dataset_path": "data/sample.txt",
-  "output_report": "reports/dataset-a/",
+  "input_dataset_path": "data/accidents_spmf.txt",
+  "output_report": "benchmark/reports/accidents_spmf/sequential/",
   "save_metrics": true
 }

@@ -1,0 +1,40 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-14T19:04:35.136371
+======================================================================
+
+Configuration:
+  Algorithm: Parallel PTF
+  Top-k: 20
+  Input Dataset: data/accidents_spmf.txt
+  Workers: 4
+
+Initial rmsup: 299191
+Initial MH size: 20
+
+Total itemsets found: 20
+Final rmsup: 317103
+
+Execution time: 30622.57 ms
+Memory used: 2612204.00 KB
+1. {17}                 => Support: 340151
+2. {12}                 => Support: 339601
+3. {12, 17}             => Support: 339569
+4. {18}                 => Support: 339095
+5. {17, 18}             => Support: 339063
+6. {12, 18}             => Support: 338921
+7. {12, 17, 18}         => Support: 338889
+8. {16}                 => Support: 332414
+9. {16, 17}             => Support: 332382
+10. {12, 16}             => Support: 332165
+11. {12, 16, 17}         => Support: 332133
+12. {16, 18}             => Support: 331648
+13. {16, 17, 18}         => Support: 331616
+14. {12, 16, 18}         => Support: 331490
+15. {12, 16, 17, 18}     => Support: 331458
+16. {31}                 => Support: 318014
+17. {17, 31}             => Support: 317988
+18. {12, 31}             => Support: 317536
+19. {12, 17, 31}         => Support: 317510
+20. {18, 31}             => Support: 317103
+Execution time: 33.3266 seconds
