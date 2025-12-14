@@ -15,6 +15,7 @@ class CoOccurrenceNumbers:
         self.prefix_partition = prefix_partition
         self.transaction_db = transaction_db
         self.co_occurrence_numbers, self.full_co_occurrence_list = self.compute_co_occurrence_numbers()
+        self.con_map = self._build_con_map()
 
     def compute_co_occurrence_numbers(self):
         partition_con_dict = self._build_partition_con()
@@ -78,6 +79,19 @@ class CoOccurrenceNumbers:
             full_con_list.extend(con_list)
         full_con_list.sort(key=lambda x: x[1], reverse=True)
         return CoN, full_con_list
+
+    def _build_con_map(self):
+        '''
+        Build a fast lookup map: frozenset(itemset) -> support
+        Used in filter_partitions for O(1) 2-itemset support lookup
+
+        Returns:
+            Dict[frozenset, int]: Maps itemset frozensets to their support values
+        '''
+        con_map = {}
+        for itemset, support in self.full_co_occurrence_list:
+            con_map[frozenset(itemset)] = support
+        return con_map
 
     def to_string(self):
         result = ""

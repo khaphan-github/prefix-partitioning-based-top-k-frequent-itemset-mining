@@ -30,11 +30,13 @@ if __name__ == "__main__":
         all_items=db.all_items,
     )
 
-    ptf.filter_partitions(
+    partitions_to_process = ptf.filter_partitions(
         ar=promissing_arr,
         all_items=db.all_items,
-        rmsup=rmsup,
-        min_heap=min_heap
+        con_map=co_occurrence_numbers.con_map,
+        min_heap=min_heap,
+        rmsup=rmsup
     )
 
-    print(min_heap.get_all())
+    print("Partitions to process:", partitions_to_process)
+    print("Final results:", min_heap.get_all())

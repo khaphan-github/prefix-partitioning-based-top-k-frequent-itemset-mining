@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FP-Growth Visualization: Phase 2 Mining</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+        
+        /* D3 Elements */
+        .node circle { 
+            fill: #fff; stroke: #475569; stroke-width: 2px; transition: all 0.4s; cursor: pointer; 
+        }
+        .node text { 
+            font-size: 11px; font-weight: bold; text-shadow: 1px 1px 0 #fff; pointer-events: none;
+        }
+        .link { 
+            fill: none; stroke: #cbd5e1; stroke-width: 1.5px; transition: all 0.4s; opacity: 0.6;
+        }
+
+        /* Mining Highlight Styles */
+        .node.target-item circle { fill: #f59e0b !important; stroke: #b45309 !important; r: 8px !important; }
+        .node.in-path circle { fill: #bfdbfe !important; stroke: #2563eb !important; }
+        .link.in-path { stroke: #2563eb !important; stroke-width: 3px !important; opacity: 1; }
+        
+        /* UI Components */
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); }
+        tr.active-mining { background-color: #fef3c7; border-left: 4px solid #f59e0b; }
+        .pattern-tag { animation: popIn 0.3s ease-out; }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-white border-b h-14 flex items-center px-4 justify-between shrink-0 shadow-sm z-20">
+        <div class="flex items-center gap-2">
+            <div class="bg-amber-500 text-white w-8 h-8 rounded flex items-center justify-center shadow">
+                <i class="fa-solid fa-gem"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-slate-800 leading-tight">FP-Growth Mining</h1>
+                <p class="text-xs text-slate-500">Phase 2: Khai phá tập phổ biến</p>
+            </div>
+        </div>
+        
+        <!-- Controls Top -->
+        <div class="flex items-center gap-3">
+            <div class="flex items-center bg-slate-100 rounded px-2 py-1 border">
+                <span class="text-xs font-semibold text-slate-500 mr-2">Min Support:</span>
+                <input type="number" id="minSupInput" value="2" min="1" class="w-12 text-sm bg-transparent font-bold text-slate-700 focus:outline-none text-right">
+            </div>
+            <button onclick="loadSampleAndBuild()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded transition">
+                <i class="fa-solid fa-rotate"></i> Reset / Mẫu
+            </button>
+            <label class="cursor-pointer px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded transition border border-blue-200">
+                <input type="file" id="fileInput" accept=".txt" class="hidden">
+                <i class="fa-solid fa-upload"></i> Upload
+            </label>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- LEFT: Header Table (Menu) -->
+        <aside class="w-72 bg-white border-r flex flex-col shadow-lg z-10 flex-shrink-0">
+            <div class="p-3 bg-slate-50 border-b">
+                <h3 class="font-bold text-slate-700 text-sm flex justify-between items-center">
+                    Header Table
+                    <span class="text-[10px] font-normal text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded">Click row to mine</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">Chọn item (từ dưới lên) để bắt đầu khai phá.</p>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto">
+                <table class="w-full text-xs">
+                    <thead class="bg-slate-50 sticky top-0 text-slate-600 font-semibold border-b">
+                        <tr>
+                            <th class="p-2 text-left pl-4">Item</th>
+                            <th class="p-2 text-center">Frequency</th>
+                            <th class="p-2 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="header-table-body" class="divide-y divide-slate-100">
+                        <!-- Items populated here -->
+                        <tr><td colspan="3" class="p-4 text-center text-slate-400 italic">Chưa có dữ liệu</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Auto Play Controls -->
+            <div class="p-3 bg-slate-50 border-t">
+                <button id="btn-auto-mine" onclick="startAutoMining()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i> Tự động khai phá tất cả
+                </button>
+            </div>
+        </aside>
+
+        <!-- CENTER: Visualization -->
+        <main class="flex-1 relative bg-slate-100 flex flex-col overflow-hidden">
+            <!-- Canvas -->
+            <div id="viz-container" class="flex-1 w-full h-full cursor-move bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px]"></div>
+            
+            <!-- Floating Tree Legend -->
+            <div class="absolute top-4 left-4 glass-panel p-2 rounded-md shadow border text-xs text-slate-600 pointer-events-none">
+                <div class="font-bold mb-1 border-b pb-1">Chú giải</div>
+                <div class="flex items-center gap-2 py-0.5"><span class="w-2 h-2 rounded-full bg-orange-500"></span> Item đang xét</div>
+                <div class="flex items-center gap-2 py-0.5"><span class="w-2 h-2 rounded-full bg-blue-200 border border-blue-500"></span> Node trên đường dẫn</div>
+                <div class="flex items-center gap-2 py-0.5"><span class="w-8 h-0.5 bg-blue-500"></span> Prefix Path</div>
+            </div>
+        </main>
+
+        <!-- RIGHT: Mining Details -->
+        <aside class="w-80 bg-white border-l flex flex-col shadow-lg z-10 flex-shrink-0">
+            <!-- Panel 1: Processing Info -->
+            <div class="h-1/2 flex flex-col border-b">
+                <div class="p-3 bg-blue-50 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-blue-800 text-sm"><i class="fa-solid fa-filter mr-1"></i> Cơ sở mẫu điều kiện</h3>
+                    <span id="current-mining-item" class="text-xs font-bold bg-white text-blue-600 px-2 py-0.5 rounded border border-blue-200">---</span>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 space-y-3 bg-white" id="cpb-container">
+                    <div class="text-xs text-slate-400 text-center italic mt-10">
+                        Chọn một item bên trái để xem các đường dẫn tiền tố (Prefix Paths)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 2: Results -->
+            <div class="h-1/2 flex flex-col bg-slate-50">
+                <div class="p-3 bg-green-50 border-b border-t flex justify-between items-center">
+                    <h3 class="font-bold text-green-800 text-sm"><i class="fa-solid fa-list-check mr-1"></i> Tập phổ biến tìm được</h3>
+                    <span id="pattern-count" class="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded-full">0</span>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3" id="results-container">
+                    <!-- Patterns go here -->
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // --- 1. CORE LOGIC (Phase 1 Adaptation) ---
+        let rawTransactions = [];
+        let fList = [];
+        let fpTreeData = { name: "Null", count: 0, children: [], id: "root" };
+        let headerTable = []; // Array of {item, count, nodes: [d3Node...]}
+        let minSupport = 2;
+        
+        // UI & Animation State
+        let svg, g, zoom;
+        let rootD3; // Hierarchy object
+        let duration = 600;
+        let isMining = false;
+        let miningQueue = [];
+
+        // Sample Data
+        const sampleDataText = `1 2 5
+2 4
+2 3
+1 2 4
+1 3
+2 3
+1 3
+1 2 3 5
+1 2 3`;
+
+        // --- INIT & SETUP ---
+        window.onload = function() {
+            initD3();
+            loadSampleAndBuild();
+        };
+
+        function initD3() {
+            const container = document.getElementById('viz-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            d3.select("#viz-container svg").remove();
+
+            svg = d3.select("#viz-container").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .call(d3.zoom().on("zoom", (e) => g.attr("transform", e.transform)))
+                .append("g")
+                .attr("transform", `translate(${width/2}, 50)`);
+            
+            g = svg;
+        }
+
+        // --- LOGIC: BUILD TREE (Phase 1 Fast) ---
+        function loadSampleAndBuild() {
+            processData(sampleDataText);
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => processData(e.target.result);
+            reader.readAsText(file);
+        });
+
+        function processData(text) {
+            // Reset
+            minSupport = parseInt(document.getElementById('minSupInput').value) || 2;
+            document.getElementById('results-container').innerHTML = '';
+            document.getElementById('pattern-count').innerText = '0';
+            document.getElementById('cpb-container').innerHTML = '<div class="text-xs text-slate-400 text-center italic mt-10">Chọn item để bắt đầu</div>';
+            
+            // 1. Parse
+            rawTransactions = text.trim().split('\n').map((line, idx) => {
+                return { id: idx, items: line.trim().split(/\s+/).map(Number) };
+            });
+
+            // 2. F-List
+            const counts = {};
+            rawTransactions.forEach(t => t.items.forEach(i => counts[i] = (counts[i]||0)+1));
+            
+            fList = Object.keys(counts)
+                .map(k => ({ item: parseInt(k), count: counts[k] }))
+                .filter(x => x.count >= minSupport)
+                .sort((a,b) => b.count - a.count || a.item - b.item);
+
+            // 3. Build Tree Structure
+            fpTreeData = { name: "Null", count: null, children: [], id: "root" };
+            const fListMap = new Map(fList.map(x => [x.item, x.count]));
+            const fListOrder = new Map(fList.map((x,i) => [x.item, i]));
+
+            rawTransactions.forEach(t => {
+                let sorted = t.items.filter(i => fListMap.has(i))
+                                    .sort((a,b) => fListOrder.get(a) - fListOrder.get(b));
+                insertToTree(sorted, fpTreeData);
+            });
+
+            // 4. Update UI
+            updateVisualization();
+            buildHeaderTableUI();
+        }
+
+        function insertToTree(items, node) {
+            if (items.length === 0) return;
+            const first = items[0];
+            let child = node.children.find(c => c.name === first);
+            if (!child) {
+                child = { name: first, count: 0, children: [], id: `n-${first}-${Math.random().toString(36).substr(2,5)}` };
+                node.children.push(child);
+            }
+            child.count++;
+            insertToTree(items.slice(1), child);
+        }
+
+        // --- VISUALIZATION (Main Canvas) ---
+        function updateVisualization() {
+            rootD3 = d3.hierarchy(fpTreeData);
+            const treeLayout = d3.tree().nodeSize([50, 80]);
+            treeLayout(rootD3);
+
+            const nodes = rootD3.descendants();
+            const links = rootD3.links();
+
+            // Render Links
+            g.selectAll(".link").remove(); // Clean redraw for simplicity
+            g.selectAll(".link")
+                .data(links)
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("id", d => `link-${d.target.data.id}`)
+                .attr("d", d => {
+                     return "M" + d.source.x + "," + d.source.y
+                        + "C" + d.source.x + "," + (d.source.y + d.target.y) / 2
+                        + " " + d.target.x + "," + (d.source.y + d.target.y) / 2
+                        + " " + d.target.x + "," + d.target.y;
+                });
+
+            // Render Nodes
+            g.selectAll(".node").remove();
+            const nodeGroup = g.selectAll(".node")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .attr("id", d => `node-g-${d.data.id}`) // Add ID for easier selection
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            nodeGroup.append("circle")
+                .attr("r", d => d.data.name === "Null" ? 6 : 14);
+
+            nodeGroup.append("text")
+                .attr("dy", ".35em")
+                .attr("text-anchor", "middle")
+                .text(d => d.data.name === "Null" ? "" : `${d.data.name}:${d.data.count}`);
+        }
+
+        // --- UI: HEADER TABLE ---
+        function buildHeaderTableUI() {
+            const tbody = document.getElementById('header-table-body');
+            tbody.innerHTML = '';
+            
+            // Reverse F-List for bottom-up mining
+            // We clone fList to not affect original order if needed elsewhere
+            const miningOrder = [...fList].reverse(); 
+            
+            if(miningOrder.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-400">Không có item thỏa mãn minSup</td></tr>';
+                 return;
+            }
+
+            miningOrder.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-100 cursor-pointer transition border-b border-slate-100";
+                tr.id = `row-item-${item.item}`;
+                tr.innerHTML = `
+                    <td class="p-2 pl-4 font-bold text-slate-700">${item.item}</td>
+                    <td class="p-2 text-center text-blue-600 font-mono">${item.count}</td>
+                    <td class="p-2 text-center">
+                        <button class="text-xs bg-white border border-slate-200 hover:bg-amber-50 text-amber-600 px-2 py-1 rounded shadow-sm">
+                            Mine
+                        </button>
+                    </td>
+                `;
+                tr.onclick = () => mineItem(item.item);
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- 2. LOGIC: MINING (Phase 2) ---
+
+        function clearHighlights() {
+            d3.selectAll(".node").classed("target-item", false).classed("in-path", false);
+            d3.selectAll(".link").classed("in-path", false);
+            document.querySelectorAll("#header-table-body tr").forEach(tr => tr.classList.remove("active-mining"));
+        }
+
+        function mineItem(targetItem) {
+            clearHighlights();
+            
+            // 1. Highlight Table Row
+            const row = document.getElementById(`row-item-${targetItem}`);
+            if(row) row.classList.add("active-mining");
+            document.getElementById('current-mining-item').innerText = `Item: ${targetItem}`;
+
+            // 2. Find Nodes in Tree (Simple Traversal for visualization)
+            // In real large scale, we use side-links. Here we filter D3 nodes.
+            const targetNodes = rootD3.descendants().filter(d => d.data.name === targetItem);
+            
+            if(targetNodes.length === 0) return;
+
+            // 3. Highlight Nodes
+            targetNodes.forEach(d => {
+                d3.select(`#node-g-${d.data.id}`).classed("target-item", true);
+            });
+
+            // 4. Extract Prefix Paths (Conditional Pattern Base)
+            const paths = []; // Array of { path: [nodes], count: int }
+            
+            targetNodes.forEach(node => {
+                const pathNodes = [];
+                let curr = node.parent;
+                let leafCount = node.data.count; // The count carried by this path
+                
+                // Trace up to root
+                while(curr && curr.data.name !== "Null") {
+                    pathNodes.unshift(curr.data.name); // Add to front
+                    
+                    // Visual Highlight
+                    d3.select(`#node-g-${curr.data.id}`).classed("in-path", true);
+                    
+                    // Find link between curr and its child (which was previous curr)
+                    // Note: D3 links are {source, target}. 
+                    // We need to highlight link connected to the child we just came from.
+                    // Actually, simpler: highlight link where target is the child.
+                    
+                    curr = curr.parent;
+                }
+
+                // Highlight links (re-traverse down from node to find links)
+                let temp = node;
+                while(temp.parent) {
+                     d3.select(`#link-${temp.data.id}`).classed("in-path", true);
+                     temp = temp.parent;
+                }
+
+                if(pathNodes.length > 0) {
+                    paths.push({ items: pathNodes, count: leafCount });
+                }
+            });
+
+            renderCPB(paths, targetItem);
+            generatePatterns(paths, targetItem);
+        }
+
+        function renderCPB(paths, targetItem) {
+            const container = document.getElementById('cpb-container');
+            container.innerHTML = '';
+            
+            if(paths.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-500">Item ${targetItem} nằm ngay dưới Root, không có đường dẫn tiền tố.</div>`;
+                return;
+            }
+
+            paths.forEach(p => {
+                const div = document.createElement('div');
+                div.className = "text-xs bg-slate-50 p-2 rounded border border-slate-200 flex justify-between items-center";
+                // Format: {item, item}: count
+                const itemsStr = p.items.map(i => `<span class="font-bold text-slate-700">${i}</span>`).join(', ');
+                div.innerHTML = `<span>{ ${itemsStr} }</span> <span class="font-mono font-bold text-blue-600">:${p.count}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function generatePatterns(paths, targetItem) {
+            // Simplified Mining Logic for Visualization
+            // 1. Calculate frequency of items in CPB
+            const conditionalCounts = {};
+            paths.forEach(p => {
+                p.items.forEach(item => {
+                    conditionalCounts[item] = (conditionalCounts[item] || 0) + p.count;
+                });
+            });
+
+            // 2. Filter by MinSup -> Conditional Frequent Items
+            const condFreqItems = Object.keys(conditionalCounts)
+                .map(k => ({ item: parseInt(k), count: conditionalCounts[k] }))
+                .filter(x => x.count >= minSupport);
+
+            const resultContainer = document.getElementById('results-container');
+            // We don't clear resultContainer if doing auto-mining, but here for single click we append?
+            // Let's prepend to show latest.
+            
+            // Default Pattern: {targetItem}: support (Calculated from Header Table total)
+            // But wait, the header table has total count.
+            // Let's construct patterns: {targetItem} + {combinations of condFreqItems}
+            
+            // Basic Visualization: Just show 1-item extensions for simplicity or full power set?
+            // For full FP-growth, we recursively mine the conditional tree.
+            // Here, to keep visualization simple, we show the direct frequent patterns generated combining target + conditional items.
+            
+            const basePattern = `<span class="font-bold text-amber-600">${targetItem}</span>`;
+            
+            // 2a. Add the item itself (Frequent 1-itemset was already found in Phase 1, but good to list)
+            // Actually usually we list patterns generated *from* this step.
+            
+            let html = '';
+            
+            if (condFreqItems.length === 0) {
+                 html = `<div class="text-xs text-slate-400 italic mb-2">Không tìm thấy mẫu mới từ ${targetItem}</div>`;
+            } else {
+                // Generate simple combinations: {condItem, targetItem}
+                condFreqItems.forEach(cf => {
+                    const el = document.createElement('div');
+                    el.className = "pattern-tag mb-2 p-2 bg-green-50 border border-green-200 rounded text-sm flex justify-between shadow-sm";
+                    el.innerHTML = `
+                        <span>{ ${cf.item}, ${basePattern} }</span>
+                        <span class="font-bold text-green-700">${cf.count}</span>
+                    `;
+                    resultContainer.prepend(el);
+                    incrementCount();
+                });
+                
+                // Note: True FP-Growth would recursively mine the conditional tree if condFreqItems > 1.
+                // For this visualization scope, showing the direct combination is usually sufficient to explain the concept.
+                if(condFreqItems.length > 1) {
+                     const complexMsg = document.createElement('div');
+                     complexMsg.className = "text-[10px] text-slate-400 text-right mb-2 border-b pb-1";
+                     complexMsg.innerText = `*Có thể đệ quy thêm với [${condFreqItems.map(x=>x.item).join(',')}]`;
+                     resultContainer.prepend(complexMsg);
+                }
+            }
+        }
+        
+        function incrementCount() {
+            const el = document.getElementById('pattern-count');
+            el.innerText = parseInt(el.innerText) + 1;
+        }
+
+        // --- AUTO MINING ---
+        async function startAutoMining() {
+            const rows = Array.from(document.querySelectorAll('#header-table-body tr')).reverse(); // Top down in UI (which is bottom up in logic)
+            // Actually our UI is sorted by F-List descending (top is most freq).
+            // Mining goes from bottom (least freq) to top.
+            // The table renders: 
+            // 1: 7 (Top)
+            // 2: 6
+            // ...
+            // 5: 2 (Bottom)
+            // So we iterate rows from bottom to top.
+            
+            const rowsToMine = Array.from(document.querySelectorAll('#header-table-body tr')).reverse();
+            
+            document.getElementById('results-container').innerHTML = ''; // Clear old results
+            document.getElementById('pattern-count').innerText = '0';
+            
+            for (const row of rowsToMine) {
+                row.click(); // Trigger click logic
+                // Wait for visual effect
+                await new Promise(r => setTimeout(r, 1500));
+            }
+            alert("Hoàn tất khai phá!");
+        }
+
+        // Resize Handler
+        window.addEventListener('resize', () => {
+             initD3();
+             updateVisualization();
+        });
+
+    </script>
+</body>
+</html>

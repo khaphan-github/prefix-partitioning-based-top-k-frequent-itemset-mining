@@ -29,16 +29,6 @@ class PrefixPartitioningbasedTopKAlgorithm:
     def build_promissing_item_arrays(self, min_heap: MinHeapTopK, all_items):
         '''
         output:  [{ item1, item2, ...}, ...]
-
-        TODO:
-        Itemset: (2, 4), Support: 3
-        Itemset: (4,), Support: 4
-        Itemset: (9, 10), Support: 5
-        Itemset: (9, 2), Support: 7
-        Itemset: (2, 10), Support: 8
-        Itemset: (10,), Support: 9
-        Itemset: (9,), Support: 7
-        Itemset: (2,), Support: 10
         {1: [], 2: [4, 10, 2], 3: [], 4: [4], 5: [], 6: [], 7: [], 8: [], 9: [10, 2, 9], 10: [10]}
         '''
         promising_items_arr = {}
@@ -48,7 +38,6 @@ class PrefixPartitioningbasedTopKAlgorithm:
 
         # Add items from min_heap
         for support, itemset in min_heap.get_all():
-            print(f"Itemset: {itemset}, Support: {support}")
             if len(itemset) == 1:
                 x_i = itemset[0]
                 promising_items_arr[x_i].append(x_i)
@@ -59,19 +48,46 @@ class PrefixPartitioningbasedTopKAlgorithm:
 
         return promising_items_arr
 
-    def filter_partitions(self, ar: dict, all_items: List[int], min_heap: MinHeapTopK, rmsup):
+    def filter_partitions(self, ar: dict, all_items: List[int], min_heap: MinHeapTopK, con_map: dict, rmsup: int):
         '''
+        Filter partitions based on pruning conditions:
+        1. If partition_item support <= rmsup, skip partition
+        2. If 2-itemset {x_i, x_j} support <= rmsup, remove x_j from AR[x_i]
+        3. If |AR[x_i]| <= 2, skip partition (Theorem 2)
+
+        Output: partitions_to_process (list of partition items worth processing)
         '''
+        partitions_to_process = []
+
         for partition_item in all_items:
             promising_items = ar[partition_item]
-            for promissing_item in promising_items:
-                # TODO: Implement algorithms
-                min_sub_partition_item = -1
-                if promissing_item == partition_item or min_sub_partition_item <= rmsup:
-                    ar[partition_item] = []
-                    break
 
-            if len(promising_items) <= 2:
+            # Pruning 1: Check if partition prefix itself has sufficient support
+            prefix_support = con_map.get(frozenset([partition_item]), 0)
+            if prefix_support <= rmsup:
+                ar[partition_item] = []
+                continue
+
+            # Pruning 2: Filter promising items based on 2-itemset support
+            filtered_promising_items = []
+            for promising_item in promising_items:
+                # max_sub_partition_item = support of 2-itemset {partition_item, promising_item}
+                two_itemset = frozenset([partition_item, promising_item])
+                max_sub_partition_item = con_map.get(two_itemset, 0)
+
+                # Keep only if 2-itemset support > rmsup
+                if max_sub_partition_item > rmsup:
+                    filtered_promising_items.append(promising_item)
+
+            ar[partition_item] = filtered_promising_items
+
+            # Pruning 3: Skip if not enough items to form complex itemsets
+            if len(filtered_promising_items) <= 2:
                 continue
             else:
-                SglPartition.execute(partition_item, promising_items, min_heap)
+                # Partition passes all filters, add to processing list
+                partitions_to_process.append(partition_item)
+                SglPartition.execute(
+                    partition_item, filtered_promising_items, min_heap)
+
+        return partitions_to_process

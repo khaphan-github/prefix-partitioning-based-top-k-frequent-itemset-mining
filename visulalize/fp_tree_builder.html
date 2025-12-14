@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FP-Tree Builder Visualization</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- D3.js v7 -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* D3 Tree Styles */
+        .node circle { 
+            fill: #fff; 
+            stroke: #3b82f6; 
+            stroke-width: 2px; 
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .node text { 
+            font-size: 12px; 
+            font-weight: bold;
+            font-family: sans-serif;
+            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+        }
+        .link { 
+            fill: none; 
+            stroke: #cbd5e1; 
+            stroke-width: 1.5px; 
+            transition: stroke 0.3s ease;
+        }
+
+        /* Animation Classes */
+        .node.active circle {
+            fill: #ef4444 !important; /* Red fill */
+            stroke: #b91c1c !important;
+            r: 20px !important;
+        }
+        .node.visited circle {
+            fill: #fee2e2;
+            stroke: #ef4444;
+        }
+        .link.active {
+            stroke: #ef4444 !important; /* Red path */
+            stroke-width: 3px !important;
+        }
+
+        /* Table Highlight */
+        tr.processing {
+            background-color: #dbeafe; /* Blue-100 */
+            font-weight: bold;
+            border-left: 4px solid #2563eb;
+        }
+        
+        #viz-container {
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-white border-b shadow-sm h-14 flex items-center px-6 justify-between z-10">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-tree text-blue-600 text-xl"></i>
+            <h1 class="font-bold text-gray-800 text-lg">FP-Growth Visualization <span class="text-xs text-gray-500 font-normal px-2 bg-gray-100 rounded">Phase 1: Tree Builder</span></h1>
+        </div>
+        <div class="text-sm text-gray-500">
+            Trạng thái: <span id="status-text" class="font-semibold text-blue-600">Sẵn sàng</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Sidebar Left: Controls & Data -->
+        <aside class="w-80 bg-white border-r flex flex-col shadow-lg z-20">
+            
+            <!-- Input Section -->
+            <div class="p-4 border-b space-y-3 bg-gray-50">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Upload File (.txt SPMF)</label>
+                    <input type="file" id="fileInput" accept=".txt" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border rounded cursor-pointer">
+                </div>
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Min Support (Count)</label>
+                        <input type="number" id="minSupInput" value="2" min="1" class="w-full text-sm border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-end">
+                         <button onclick="loadSampleData()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1.5 rounded transition">Dùng mẫu</button>
+                    </div>
+                </div>
+                <button onclick="preprocessData()" id="btn-process" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1.5 rounded transition shadow-sm">
+                    1. Xử lý dữ liệu
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b text-xs font-semibold text-gray-600 bg-white">
+                <button class="flex-1 py-2 border-b-2 border-blue-500 text-blue-600 active-tab" onclick="switchTab('raw')">Transactions</button>
+                <button class="flex-1 py-2 border-b-2 border-transparent hover:text-blue-500" onclick="switchTab('flist')">F-List</button>
+            </div>
+
+            <!-- Data Tables Area -->
+            <div class="flex-1 overflow-y-auto relative">
+                <!-- Raw Data Table -->
+                <div id="tab-raw" class="p-0">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-gray-100 text-gray-600 sticky top-0">
+                            <tr>
+                                <th class="p-2 border-b w-10 text-center">ID</th>
+                                <th class="p-2 border-b">Items (Gốc)</th>
+                                <th class="p-2 border-b">Items (Đã sắp xếp)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-table-body" class="divide-y">
+                            <tr><td colspan="3" class="p-4 text-center text-gray-400">Chưa có dữ liệu</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- F-List Table -->
+                <div id="tab-flist" class="hidden p-0">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-gray-100 text-gray-600 sticky top-0">
+                            <tr>
+                                <th class="p-2 border-b">Item ID</th>
+                                <th class="p-2 border-b text-right">Support Count</th>
+                            </tr>
+                        </thead>
+                        <tbody id="flist-table-body" class="divide-y">
+                             <tr><td colspan="2" class="p-4 text-center text-gray-400">Chưa tính toán</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Animation Controls -->
+            <div class="p-4 border-t bg-gray-50">
+                <div class="mb-3">
+                    <div class="flex justify-between text-xs text-gray-600 mb-1">
+                        <span>Tốc độ</span>
+                        <span id="speed-val">3s</span>
+                    </div>
+                    <input type="range" id="speedRange" min="100" max="5000" value="3000" class="w-full h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <button id="btn-reset" onclick="resetTree()" class="col-span-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded py-1.5 text-xs font-bold"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button id="btn-play" onclick="togglePlay()" class="col-span-2 bg-green-600 hover:bg-green-700 text-white rounded py-1.5 text-sm font-bold flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-play"></i> <span>Chạy</span>
+                    </button>
+                    <button id="btn-next" onclick="stepForward()" class="col-span-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded py-1.5 text-xs font-bold"><i class="fa-solid fa-forward-step"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right: Visualization Canvas -->
+        <main class="flex-1 relative bg-white flex flex-col">
+            <!-- Legend -->
+            <div class="absolute top-4 left-4 bg-white/90 p-2 rounded border shadow-sm z-10 text-xs text-gray-600 pointer-events-none">
+                <div class="flex items-center gap-2 mb-1"><span class="w-3 h-3 rounded-full border-2 border-blue-500 bg-white"></span> Node thường</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-red-600 bg-red-500"></span> Node đang xét</div>
+            </div>
+
+            <!-- SVG Container -->
+            <div id="viz-container" class="flex-1 w-full h-full overflow-hidden cursor-move"></div>
+            
+            <!-- Log Console -->
+            <div class="h-32 bg-gray-900 text-gray-200 text-xs font-mono p-3 overflow-y-auto border-t border-gray-700" id="console-log">
+                <div class="text-green-400">Welcome! Vui lòng upload file hoặc chọn "Dùng mẫu" để bắt đầu.</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- 1. GLOBAL VARIABLES & CONFIG ---
+        let rawTransactions = [];
+        let processedTransactions = []; // [[item, item...], ...] sorted by F-List
+        let fList = []; // Array of {item, count}
+        let minSupport = 2;
+        let animationSpeed = 3000;
+        let isPlaying = false;
+        let currentTransactionIndex = 0;
+        let intervalId = null;
+
+        // FP-Tree Structure
+        let fpTreeData = { name: "Null", count: 0, children: [], id: "root" };
+        let fpTreeRoot = null; // D3 Hierarchy object
+
+        // D3 Visual configurations
+        const margin = { top: 40, right: 90, bottom: 30, left: 90 };
+        let width, height, svg, g, zoom;
+        let i = 0, duration = 500;
+        
+        // --- 2. DATA PROCESSING ---
+
+        // Sample Data for quick testing
+        const sampleDataText = `1 2 5
+2 4
+2 3
+1 2 4
+1 3
+2 3
+1 3
+1 2 3 5
+1 2 3`;
+
+        function loadSampleData() {
+            document.getElementById('fileInput').value = "";
+            processTextData(sampleDataText);
+            log("Đã nạp dữ liệu mẫu.", "info");
+        }
+
+        // Handle File Upload
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                processTextData(e.target.result);
+                log(`Đã tải file: ${file.name}`, "success");
+            };
+            reader.readAsText(file);
+        });
+
+        function processTextData(text) {
+            rawTransactions = text.trim().split('\n').map((line, idx) => {
+                const items = line.trim().split(/\s+/).map(Number); // Assume integer items
+                return { id: idx + 1, items: items };
+            });
+            renderRawTable();
+            resetUI();
+        }
+
+        function preprocessData() {
+            if (rawTransactions.length === 0) {
+                alert("Vui lòng tải dữ liệu trước!");
+                return;
+            }
+
+            minSupport = parseInt(document.getElementById('minSupInput').value) || 2;
+            
+            // 1. Calculate Frequencies
+            const counts = {};
+            rawTransactions.forEach(t => {
+                t.items.forEach(item => {
+                    counts[item] = (counts[item] || 0) + 1;
+                });
+            });
+
+            // 2. Build F-List (Filter & Sort)
+            fList = Object.keys(counts)
+                .map(key => ({ item: parseInt(key), count: counts[key] }))
+                .filter(x => x.count >= minSupport)
+                .sort((a, b) => b.count - a.count || a.item - b.item); // Sort desc count, then asc item
+
+            renderFListTable();
+
+            // 3. Reorder Transactions
+            const fListMap = new Map(fList.map(x => [x.item, x.count]));
+            const fListOrder = new Map(fList.map((x, idx) => [x.item, idx])); // For efficient sorting
+
+            processedTransactions = rawTransactions.map(t => {
+                // Filter items not in F-List
+                let validItems = t.items.filter(item => fListMap.has(item));
+                // Sort by F-List order
+                validItems.sort((a, b) => fListOrder.get(a) - fListOrder.get(b));
+                return { id: t.id, original: t.items, sorted: validItems };
+            });
+
+            renderRawTable(true); // Update table with sorted data
+            
+            // Init Tree
+            resetTreeStructure();
+            updateVisualization();
+            
+            log(`Đã xử lý dữ liệu. MinSup: ${minSupport}. Sẵn sàng xây dựng cây.`, "success");
+            
+            // Enable controls
+            currentTransactionIndex = 0;
+            document.getElementById('btn-play').disabled = false;
+            document.getElementById('btn-next').disabled = false;
+        }
+
+        // --- 3. FP-TREE LOGIC ---
+
+        function resetTreeStructure() {
+            fpTreeData = { name: "Null", count: null, children: [], id: "root" };
+            currentTransactionIndex = 0;
+        }
+
+        // Insert a transaction into the tree
+        // Returns the path of nodes visited/created for animation highlighting
+        function insertTransaction(items) {
+            let currentNode = fpTreeData;
+            let pathNodes = [currentNode];
+            let pathLinks = [];
+
+            items.forEach(item => {
+                // Check if child exists
+                let child = currentNode.children.find(c => c.name == item);
+                
+                if (child) {
+                    child.count++;
+                } else {
+                    child = { 
+                        name: item, 
+                        count: 1, 
+                        children: [], 
+                        id: `node-${item}-${Math.random().toString(36).substr(2, 9)}` // Unique ID for D3
+                    };
+                    currentNode.children.push(child);
+                }
+                
+                pathLinks.push({source: currentNode, target: child});
+                currentNode = child;
+                pathNodes.push(currentNode);
+            });
+
+            return { nodes: pathNodes, links: pathLinks };
+        }
+
+        // --- 4. VISUALIZATION (D3.JS) ---
+
+        function initD3() {
+            width = document.getElementById('viz-container').clientWidth;
+            height = document.getElementById('viz-container').clientHeight;
+
+            d3.select("#viz-container").select("svg").remove();
+
+            svg = d3.select("#viz-container").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .call(d3.zoom().on("zoom", (event) => {
+                    g.attr("transform", event.transform);
+                }))
+                .append("g")
+                .attr("transform", "translate(" + width / 2 + "," + 50 + ")");
+
+            g = svg;
+        }
+
+        function updateVisualization(highlightPath = null) {
+            // Convert data to D3 hierarchy
+            fpTreeRoot = d3.hierarchy(fpTreeData);
+            
+            // Tree layout
+            const treeLayout = d3.tree().nodeSize([60, 80]); // Width, Height spacing
+            treeLayout(fpTreeRoot);
+
+            // Compute new positions
+            const nodes = fpTreeRoot.descendants();
+            const links = fpTreeRoot.links();
+
+            // --- LINKS ---
+            const linkSelect = g.selectAll(".link")
+                .data(links, d => d.target.data.id);
+
+            // Enter
+            linkSelect.enter().append("path")
+                .attr("class", "link")
+                .attr("d", d => {
+                    // FIX: Create a proper link object for diagonal
+                    // Start from parent's current position (or source position)
+                    const o = {x: d.source.x, y: d.source.y};
+                    // Instead of diagonal(o, o) which fails, we pass an object with source and target properties
+                    return diagonal({source: o, target: o});
+                })
+                .merge(linkSelect)
+                .transition().duration(duration)
+                .attr("d", diagonal)
+                .attr("class", d => {
+                    if (highlightPath && isLinkInPath(d, highlightPath.links)) return "link active";
+                    return "link";
+                });
+
+            // Exit
+            linkSelect.exit().transition().duration(duration).remove();
+
+            // --- NODES ---
+            const nodeSelect = g.selectAll(".node")
+                .data(nodes, d => d.data.id);
+
+            // Enter
+            const nodeEnter = nodeSelect.enter().append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.parent ? d.parent.x : d.x},${d.parent ? d.parent.y : d.y})`); // Start at parent position
+
+            nodeEnter.append("circle")
+                .attr("r", 0)
+                .transition().duration(duration)
+                .attr("r", 15);
+
+            nodeEnter.append("text")
+                .attr("dy", ".35em")
+                .attr("text-anchor", "middle")
+                .text(d => d.data.name === "Null" ? "Null" : `${d.data.name}:${d.data.count}`)
+                .style("opacity", 0)
+                .transition().duration(duration)
+                .style("opacity", 1);
+
+            // Update
+            const nodeUpdate = nodeEnter.merge(nodeSelect);
+
+            nodeUpdate.transition().duration(duration)
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            nodeUpdate.select("circle")
+                .attr("class", d => {
+                    if (highlightPath && isNodeInPath(d, highlightPath.nodes)) return "active";
+                    return "";
+                })
+                .attr("r", d => (d.data.name === "Null") ? 10 : 18);
+
+            nodeUpdate.select("text")
+                .text(d => d.data.name === "Null" ? "Null" : `${d.data.name}:${d.data.count}`);
+
+            // Exit
+            const nodeExit = nodeSelect.exit().transition().duration(duration).remove();
+            nodeExit.select("circle").attr("r", 0);
+        }
+
+        // Helper for curved paths
+        function diagonal(d) {
+             return "M" + d.source.x + "," + d.source.y
+                + "C" + d.source.x + "," + (d.source.y + d.target.y) / 2
+                + " " + d.target.x + "," + (d.source.y + d.target.y) / 2
+                + " " + d.target.x + "," + d.target.y;
+        }
+
+        function isNodeInPath(d3Node, pathNodes) {
+            return pathNodes.some(p => p.id === d3Node.data.id);
+        }
+        function isLinkInPath(d3Link, pathLinks) {
+            return pathLinks.some(l => 
+                l.source.id === d3Link.source.data.id && 
+                l.target.id === d3Link.target.data.id
+            );
+        }
+
+        // --- 5. ANIMATION CONTROL ---
+
+        function togglePlay() {
+            const btn = document.getElementById('btn-play');
+            if (isPlaying) {
+                isPlaying = false;
+                clearTimeout(intervalId);
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Chạy</span>';
+                btn.className = "col-span-2 bg-green-600 hover:bg-green-700 text-white rounded py-1.5 text-sm font-bold flex items-center justify-center gap-1";
+                document.getElementById('status-text').innerText = "Tạm dừng";
+            } else {
+                if (currentTransactionIndex >= processedTransactions.length) {
+                    alert("Đã hoàn thành xây dựng cây!");
+                    return;
+                }
+                isPlaying = true;
+                btn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Dừng</span>';
+                btn.className = "col-span-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded py-1.5 text-sm font-bold flex items-center justify-center gap-1";
+                document.getElementById('status-text').innerText = "Đang chạy...";
+                runLoop();
+            }
+        }
+
+        function runLoop() {
+            if (!isPlaying) return;
+            stepForward();
+            intervalId = setTimeout(runLoop, animationSpeed);
+        }
+
+        function stepForward() {
+            if (currentTransactionIndex >= processedTransactions.length) {
+                isPlaying = false;
+                clearTimeout(intervalId);
+                togglePlay(); // Reset UI state
+                log("Hoàn tất xây dựng cây!", "success");
+                document.getElementById('status-text').innerText = "Hoàn tất";
+                updateVisualization(null); // Clear highlights
+                highlightTableRow(-1);
+                return;
+            }
+
+            const currentTrans = processedTransactions[currentTransactionIndex];
+            
+            // 1. Log info
+            log(`Transaction #${currentTrans.id}: [${currentTrans.sorted.join(", ")}]`, "info");
+            
+            // 2. Highlight Table Row
+            highlightTableRow(currentTransactionIndex);
+
+            // 3. Logic: Insert into Tree
+            const pathInfo = insertTransaction(currentTrans.sorted);
+
+            // 4. Update Visual with Highlight
+            updateVisualization(pathInfo);
+
+            currentTransactionIndex++;
+            
+            // Scroll table to visible
+            const tableContainer = document.getElementById('tab-raw').parentElement;
+            const row = document.getElementById(`row-${currentTrans.id}`);
+            if (row) {
+                // simple scroll logic
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function resetTree() {
+            isPlaying = false;
+            clearTimeout(intervalId);
+            document.getElementById('btn-play').innerHTML = '<i class="fa-solid fa-play"></i> <span>Chạy</span>';
+            resetTreeStructure();
+            updateVisualization();
+            highlightTableRow(-1);
+            log("Đã reset cây.", "info");
+            document.getElementById('status-text').innerText = "Đã reset";
+        }
+
+        // --- 6. UI HELPERS ---
+
+        function renderRawTable(hasSorted = false) {
+            const tbody = document.getElementById('transaction-table-body');
+            tbody.innerHTML = '';
+            rawTransactions.forEach((t, idx) => {
+                const sortedItems = hasSorted && processedTransactions[idx] ? processedTransactions[idx].sorted.join(', ') : '-';
+                const row = `
+                    <tr id="row-${t.id}" class="hover:bg-gray-50 transition">
+                        <td class="p-2 border-b text-center text-gray-500">${t.id}</td>
+                        <td class="p-2 border-b font-mono text-gray-700">[${t.items.join(', ')}]</td>
+                        <td class="p-2 border-b font-mono text-blue-600 font-semibold">[${sortedItems}]</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function renderFListTable() {
+            const tbody = document.getElementById('flist-table-body');
+            tbody.innerHTML = '';
+            if (fList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-gray-400">Không có item nào đạt MinSup</td></tr>';
+                return;
+            }
+            fList.forEach(item => {
+                const row = `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2 border-b font-bold text-gray-700">${item.item}</td>
+                        <td class="p-2 border-b text-right text-blue-600">${item.count}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function highlightTableRow(index) {
+            // Remove old highlight
+            document.querySelectorAll('tr.processing').forEach(el => el.classList.remove('processing'));
+            if (index >= 0 && index < processedTransactions.length) {
+                const id = processedTransactions[index].id;
+                const row = document.getElementById(`row-${id}`);
+                if (row) row.classList.add('processing');
+            }
+        }
+
+        function switchTab(tabName) {
+            if (tabName === 'raw') {
+                document.getElementById('tab-raw').classList.remove('hidden');
+                document.getElementById('tab-flist').classList.add('hidden');
+                document.querySelectorAll('button[onclick^="switchTab"]').forEach(b => {
+                    b.classList.remove('border-blue-500', 'text-blue-600');
+                    b.classList.add('border-transparent');
+                });
+                // Should query specific button but saving specific ID for brevity
+                event.target.classList.add('border-blue-500', 'text-blue-600');
+                event.target.classList.remove('border-transparent');
+
+            } else {
+                document.getElementById('tab-raw').classList.add('hidden');
+                document.getElementById('tab-flist').classList.remove('hidden');
+                document.querySelectorAll('button[onclick^="switchTab"]').forEach(b => {
+                    b.classList.remove('border-blue-500', 'text-blue-600');
+                    b.classList.add('border-transparent');
+                });
+                event.target.classList.add('border-blue-500', 'text-blue-600');
+                event.target.classList.remove('border-transparent');
+            }
+        }
+
+        function log(msg, type="default") {
+            const consoleDiv = document.getElementById('console-log');
+            const time = new Date().toLocaleTimeString();
+            let colorClass = "text-gray-300";
+            if (type === "success") colorClass = "text-green-400";
+            if (type === "info") colorClass = "text-blue-400";
+            
+            const line = `<div class="mb-1"><span class="text-gray-500">[${time}]</span> <span class="${colorClass}">${msg}</span></div>`;
+            consoleDiv.innerHTML = line + consoleDiv.innerHTML;
+        }
+
+        function resetUI() {
+            document.getElementById('flist-table-body').innerHTML = '<tr><td colspan="2" class="p-4 text-center text-gray-400">Chưa tính toán</td></tr>';
+            document.getElementById('btn-play').disabled = true;
+            document.getElementById('btn-next').disabled = true;
+            resetTreeStructure();
+            initD3();
+            updateVisualization();
+        }
+
+        // Speed slider listener
+        document.getElementById('speedRange').addEventListener('input', function(e) {
+            animationSpeed = 5100 - parseInt(e.target.value); // Invert: High value = Low delay
+            let displaySec = (animationSpeed / 1000).toFixed(1) + "s";
+            document.getElementById('speed-val').innerText = displaySec;
+        });
+        
+        // Initial set up
+        window.addEventListener('resize', () => {
+             initD3();
+             updateVisualization();
+        });
+        
+        // Init D3 on load
+        initD3();
+        updateVisualization();
+
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FP-Tree Builder Visualization</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- D3.js v7 -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* D3 Tree Styles */
+        .node circle { 
+            fill: #fff; 
+            stroke: #3b82f6; 
+            stroke-width: 2px; 
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .node text { 
+            font-size: 12px; 
+            font-weight: bold;
+            font-family: sans-serif;
+            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+        }
+        .link { 
+            fill: none; 
+            stroke: #cbd5e1; 
+            stroke-width: 1.5px; 
+            transition: stroke 0.3s ease;
+        }
+
+        /* Animation Classes */
+        .node.active circle {
+            fill: #ef4444 !important; /* Red fill */
+            stroke: #b91c1c !important;
+            r: 20px !important;
+        }
+        .node.visited circle {
+            fill: #fee2e2;
+            stroke: #ef4444;
+        }
+        .link.active {
+            stroke: #ef4444 !important; /* Red path */
+            stroke-width: 3px !important;
+        }
+
+        /* Table Highlight */
+        tr.processing {
+            background-color: #dbeafe; /* Blue-100 */
+            font-weight: bold;
+            border-left: 4px solid #2563eb;
+        }
+        
+        #viz-container {
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-white border-b shadow-sm h-14 flex items-center px-6 justify-between z-10">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-tree text-blue-600 text-xl"></i>
+            <h1 class="font-bold text-gray-800 text-lg">FP-Growth Visualization <span class="text-xs text-gray-500 font-normal px-2 bg-gray-100 rounded">Phase 1: Tree Builder</span></h1>
+        </div>
+        <div class="text-sm text-gray-500">
+            Trạng thái: <span id="status-text" class="font-semibold text-blue-600">Sẵn sàng</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Sidebar Left: Controls & Data -->
+        <aside class="w-80 bg-white border-r flex flex-col shadow-lg z-20">
+            
+            <!-- Input Section -->
+            <div class="p-4 border-b space-y-3 bg-gray-50">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Upload File (.txt SPMF)</label>
+                    <input type="file" id="fileInput" accept=".txt" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border rounded cursor-pointer">
+                </div>
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Min Support (Count)</label>
+                        <input type="number" id="minSupInput" value="2" min="1" class="w-full text-sm border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-end">
+                         <button onclick="loadSampleData()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1.5 rounded transition">Dùng mẫu</button>
+                    </div>
+                </div>
+                <button onclick="preprocessData()" id="btn-process" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1.5 rounded transition shadow-sm">
+                    1. Xử lý dữ liệu
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b text-xs font-semibold text-gray-600 bg-white">
+                <button class="flex-1 py-2 border-b-2 border-blue-500 text-blue-600 active-tab" onclick="switchTab('raw')">Transactions</button>
+                <button class="flex-1 py-2 border-b-2 border-transparent hover:text-blue-500" onclick="switchTab('flist')">F-List</button>
+            </div>
+
+            <!-- Data Tables Area -->
+            <div class="flex-1 overflow-y-auto relative">
+                <!-- Raw Data Table -->
+                <div id="tab-raw" class="p-0">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-gray-100 text-gray-600 sticky top-0">
+                            <tr>
+                                <th class="p-2 border-b w-10 text-center">ID</th>
+                                <th class="p-2 border-b">Items (Gốc)</th>
+                                <th class="p-2 border-b">Items (Đã sắp xếp)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-table-body" class="divide-y">
+                            <tr><td colspan="3" class="p-4 text-center text-gray-400">Chưa có dữ liệu</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- F-List Table -->
+                <div id="tab-flist" class="hidden p-0">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-gray-100 text-gray-600 sticky top-0">
+                            <tr>
+                                <th class="p-2 border-b">Item ID</th>
+                                <th class="p-2 border-b text-right">Support Count</th>
+                            </tr>
+                        </thead>
+                        <tbody id="flist-table-body" class="divide-y">
+                             <tr><td colspan="2" class="p-4 text-center text-gray-400">Chưa tính toán</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Animation Controls -->
+            <div class="p-4 border-t bg-gray-50">
+                <div class="mb-3">
+                    <div class="flex justify-between text-xs text-gray-600 mb-1">
+                        <span>Tốc độ</span>
+                        <span id="speed-val">3s</span>
+                    </div>
+                    <input type="range" id="speedRange" min="100" max="5000" value="3000" class="w-full h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <button id="btn-reset" onclick="resetTree()" class="col-span-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded py-1.5 text-xs font-bold"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button id="btn-play" onclick="togglePlay()" class="col-span-2 bg-green-600 hover:bg-green-700 text-white rounded py-1.5 text-sm font-bold flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-play"></i> <span>Chạy</span>
+                    </button>
+                    <button id="btn-next" onclick="stepForward()" class="col-span-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded py-1.5 text-xs font-bold"><i class="fa-solid fa-forward-step"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right: Visualization Canvas -->
+        <main class="flex-1 relative bg-white flex flex-col">
+            <!-- Legend -->
+            <div class="absolute top-4 left-4 bg-white/90 p-2 rounded border shadow-sm z-10 text-xs text-gray-600 pointer-events-none">
+                <div class="flex items-center gap-2 mb-1"><span class="w-3 h-3 rounded-full border-2 border-blue-500 bg-white"></span> Node thường</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-red-600 bg-red-500"></span> Node đang xét</div>
+            </div>
+
+            <!-- SVG Container -->
+            <div id="viz-container" class="flex-1 w-full h-full overflow-hidden cursor-move"></div>
+            
+            <!-- Log Console -->
+            <div class="h-32 bg-gray-900 text-gray-200 text-xs font-mono p-3 overflow-y-auto border-t border-gray-700" id="console-log">
+                <div class="text-green-400">Welcome! Vui lòng upload file hoặc chọn "Dùng mẫu" để bắt đầu.</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- 1. GLOBAL VARIABLES & CONFIG ---
+        let rawTransactions = [];
+        let processedTransactions = []; // [[item, item...], ...] sorted by F-List
+        let fList = []; // Array of {item, count}
+        let minSupport = 2;
+        let animationSpeed = 3000;
+        let isPlaying = false;
+        let currentTransactionIndex = 0;
+        let intervalId = null;
+
+        // FP-Tree Structure
+        let fpTreeData = { name: "Null", count: 0, children: [], id: "root" };
+        let fpTreeRoot = null; // D3 Hierarchy object
+
+        // D3 Visual configurations
+        const margin = { top: 40, right: 90, bottom: 30, left: 90 };
+        let width, height, svg, g, zoom;
+        let i = 0, duration = 500;
+        
+        // --- 2. DATA PROCESSING ---
+
+        // Sample Data for quick testing
+        const sampleDataText = `1 2 5
+2 4
+2 3
+1 2 4
+1 3
+2 3
+1 3
+1 2 3 5
+1 2 3`;
+
+        function loadSampleData() {
+            document.getElementById('fileInput').value = "";
+            processTextData(sampleDataText);
+            log("Đã nạp dữ liệu mẫu.", "info");
+        }
+
+        // Handle File Upload
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                processTextData(e.target.result);
+                log(`Đã tải file: ${file.name}`, "success");
+            };
+            reader.readAsText(file);
+        });
+
+        function processTextData(text) {
+            rawTransactions = text.trim().split('\n').map((line, idx) => {
+                const items = line.trim().split(/\s+/).map(Number); // Assume integer items
+                return { id: idx + 1, items: items };
+            });
+            renderRawTable();
+            resetUI();
+        }
+
+        function preprocessData() {
+            if (rawTransactions.length === 0) {
+                alert("Vui lòng tải dữ liệu trước!");
+                return;
+            }
+
+            minSupport = parseInt(document.getElementById('minSupInput').value) || 2;
+            
+            // 1. Calculate Frequencies
+            const counts = {};
+            rawTransactions.forEach(t => {
+                t.items.forEach(item => {
+                    counts[item] = (counts[item] || 0) + 1;
+                });
+            });
+
+            // 2. Build F-List (Filter & Sort)
+            fList = Object.keys(counts)
+                .map(key => ({ item: parseInt(key), count: counts[key] }))
+                .filter(x => x.count >= minSupport)
+                .sort((a, b) => b.count - a.count || a.item - b.item); // Sort desc count, then asc item
+
+            renderFListTable();
+
+            // 3. Reorder Transactions
+            const fListMap = new Map(fList.map(x => [x.item, x.count]));
+            const fListOrder = new Map(fList.map((x, idx) => [x.item, idx])); // For efficient sorting
+
+            processedTransactions = rawTransactions.map(t => {
+                // Filter items not in F-List
+                let validItems = t.items.filter(item => fListMap.has(item));
+                // Sort by F-List order
+                validItems.sort((a, b) => fListOrder.get(a) - fListOrder.get(b));
+                return { id: t.id, original: t.items, sorted: validItems };
+            });
+
+            renderRawTable(true); // Update table with sorted data
+            
+            // Init Tree
+            resetTreeStructure();
+            updateVisualization();
+            
+            log(`Đã xử lý dữ liệu. MinSup: ${minSupport}. Sẵn sàng xây dựng cây.`, "success");
+            
+            // Enable controls
+            currentTransactionIndex = 0;
+            document.getElementById('btn-play').disabled = false;
+            document.getElementById('btn-next').disabled = false;
+        }
+
+        // --- 3. FP-TREE LOGIC ---
+
+        function resetTreeStructure() {
+            fpTreeData = { name: "Null", count: null, children: [], id: "root" };
+            currentTransactionIndex = 0;
+        }
+
+        // Insert a transaction into the tree
+        // Returns the path of nodes visited/created for animation highlighting
+        function insertTransaction(items) {
+            let currentNode = fpTreeData;
+            let pathNodes = [currentNode];
+            let pathLinks = [];
+
+            items.forEach(item => {
+                // Check if child exists
+                let child = currentNode.children.find(c => c.name == item);
+                
+                if (child) {
+                    child.count++;
+                } else {
+                    child = { 
+                        name: item, 
+                        count: 1, 
+                        children: [], 
+                        id: `node-${item}-${Math.random().toString(36).substr(2, 9)}` // Unique ID for D3
+                    };
+                    currentNode.children.push(child);
+                }
+                
+                pathLinks.push({source: currentNode, target: child});
+                currentNode = child;
+                pathNodes.push(currentNode);
+            });
+
+            return { nodes: pathNodes, links: pathLinks };
+        }
+
+        // --- 4. VISUALIZATION (D3.JS) ---
+
+        function initD3() {
+            width = document.getElementById('viz-container').clientWidth;
+            height = document.getElementById('viz-container').clientHeight;
+
+            d3.select("#viz-container").select("svg").remove();
+
+            svg = d3.select("#viz-container").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .call(d3.zoom().on("zoom", (event) => {
+                    g.attr("transform", event.transform);
+                }))
+                .append("g")
+                .attr("transform", "translate(" + width / 2 + "," + 50 + ")");
+
+            g = svg;
+        }
+
+        function updateVisualization(highlightPath = null) {
+            // Convert data to D3 hierarchy
+            fpTreeRoot = d3.hierarchy(fpTreeData);
+            
+            // Tree layout
+            const treeLayout = d3.tree().nodeSize([60, 80]); // Width, Height spacing
+            treeLayout(fpTreeRoot);
+
+            // Compute new positions
+            const nodes = fpTreeRoot.descendants();
+            const links = fpTreeRoot.links();
+
+            // --- LINKS ---
+            const linkSelect = g.selectAll(".link")
+                .data(links, d => d.target.data.id);
+
+            // Enter
+            linkSelect.enter().append("path")
+                .attr("class", "link")
+                .attr("d", d => {
+                    // FIX: Create a proper link object for diagonal
+                    // Start from parent's current position (or source position)
+                    const o = {x: d.source.x, y: d.source.y};
+                    // Instead of diagonal(o, o) which fails, we pass an object with source and target properties
+                    return diagonal({source: o, target: o});
+                })
+                .merge(linkSelect)
+                .transition().duration(duration)
+                .attr("d", diagonal)
+                .attr("class", d => {
+                    if (highlightPath && isLinkInPath(d, highlightPath.links)) return "link active";
+                    return "link";
+                });
+
+            // Exit
+            linkSelect.exit().transition().duration(duration).remove();
+
+            // --- NODES ---
+            const nodeSelect = g.selectAll(".node")
+                .data(nodes, d => d.data.id);
+
+            // Enter
+            const nodeEnter = nodeSelect.enter().append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.parent ? d.parent.x : d.x},${d.parent ? d.parent.y : d.y})`); // Start at parent position
+
+            nodeEnter.append("circle")
+                .attr("r", 0)
+                .transition().duration(duration)
+                .attr("r", 15);
+
+            nodeEnter.append("text")
+                .attr("dy", ".35em")
+                .attr("text-anchor", "middle")
+                .text(d => d.data.name === "Null" ? "Null" : `${d.data.name}:${d.data.count}`)
+                .style("opacity", 0)
+                .transition().duration(duration)
+                .style("opacity", 1);
+
+            // Update
+            const nodeUpdate = nodeEnter.merge(nodeSelect);
+
+            nodeUpdate.transition().duration(duration)
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            nodeUpdate.select("circle")
+                .attr("class", d => {
+                    if (highlightPath && isNodeInPath(d, highlightPath.nodes)) return "active";
+                    return "";
+                })
+                .attr("r", d => (d.data.name === "Null") ? 10 : 18);
+
+            nodeUpdate.select("text")
+                .text(d => d.data.name === "Null" ? "Null" : `${d.data.name}:${d.data.count}`);
+
+            // Exit
+            const nodeExit = nodeSelect.exit().transition().duration(duration).remove();
+            nodeExit.select("circle").attr("r", 0);
+        }
+
+        // Helper for curved paths
+        function diagonal(d) {
+             return "M" + d.source.x + "," + d.source.y
+                + "C" + d.source.x + "," + (d.source.y + d.target.y) / 2
+                + " " + d.target.x + "," + (d.source.y + d.target.y) / 2
+                + " " + d.target.x + "," + d.target.y;
+        }
+
+        function isNodeInPath(d3Node, pathNodes) {
+            return pathNodes.some(p => p.id === d3Node.data.id);
+        }
+        function isLinkInPath(d3Link, pathLinks) {
+            return pathLinks.some(l => 
+                l.source.id === d3Link.source.data.id && 
+                l.target.id === d3Link.target.data.id
+            );
+        }
+
+        // --- 5. ANIMATION CONTROL ---
+
+        function togglePlay() {
+            const btn = document.getElementById('btn-play');
+            if (isPlaying) {
+                isPlaying = false;
+                clearTimeout(intervalId);
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Chạy</span>';
+                btn.className = "col-span-2 bg-green-600 hover:bg-green-700 text-white rounded py-1.5 text-sm font-bold flex items-center justify-center gap-1";
+                document.getElementById('status-text').innerText = "Tạm dừng";
+            } else {
+                if (currentTransactionIndex >= processedTransactions.length) {
+                    alert("Đã hoàn thành xây dựng cây!");
+                    return;
+                }
+                isPlaying = true;
+                btn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Dừng</span>';
+                btn.className = "col-span-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded py-1.5 text-sm font-bold flex items-center justify-center gap-1";
+                document.getElementById('status-text').innerText = "Đang chạy...";
+                runLoop();
+            }
+        }
+
+        function runLoop() {
+            if (!isPlaying) return;
+            stepForward();
+            intervalId = setTimeout(runLoop, animationSpeed);
+        }
+
+        function stepForward() {
+            if (currentTransactionIndex >= processedTransactions.length) {
+                isPlaying = false;
+                clearTimeout(intervalId);
+                togglePlay(); // Reset UI state
+                log("Hoàn tất xây dựng cây!", "success");
+                document.getElementById('status-text').innerText = "Hoàn tất";
+                updateVisualization(null); // Clear highlights
+                highlightTableRow(-1);
+                return;
+            }
+
+            const currentTrans = processedTransactions[currentTransactionIndex];
+            
+            // 1. Log info
+            log(`Transaction #${currentTrans.id}: [${currentTrans.sorted.join(", ")}]`, "info");
+            
+            // 2. Highlight Table Row
+            highlightTableRow(currentTransactionIndex);
+
+            // 3. Logic: Insert into Tree
+            const pathInfo = insertTransaction(currentTrans.sorted);
+
+            // 4. Update Visual with Highlight
+            updateVisualization(pathInfo);
+
+            currentTransactionIndex++;
+            
+            // Scroll table to visible
+            const tableContainer = document.getElementById('tab-raw').parentElement;
+            const row = document.getElementById(`row-${currentTrans.id}`);
+            if (row) {
+                // simple scroll logic
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function resetTree() {
+            isPlaying = false;
+            clearTimeout(intervalId);
+            document.getElementById('btn-play').innerHTML = '<i class="fa-solid fa-play"></i> <span>Chạy</span>';
+            resetTreeStructure();
+            updateVisualization();
+            highlightTableRow(-1);
+            log("Đã reset cây.", "info");
+            document.getElementById('status-text').innerText = "Đã reset";
+        }
+
+        // --- 6. UI HELPERS ---
+
+        function renderRawTable(hasSorted = false) {
+            const tbody = document.getElementById('transaction-table-body');
+            tbody.innerHTML = '';
+            rawTransactions.forEach((t, idx) => {
+                const sortedItems = hasSorted && processedTransactions[idx] ? processedTransactions[idx].sorted.join(', ') : '-';
+                const row = `
+                    <tr id="row-${t.id}" class="hover:bg-gray-50 transition">
+                        <td class="p-2 border-b text-center text-gray-500">${t.id}</td>
+                        <td class="p-2 border-b font-mono text-gray-700">[${t.items.join(', ')}]</td>
+                        <td class="p-2 border-b font-mono text-blue-600 font-semibold">[${sortedItems}]</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function renderFListTable() {
+            const tbody = document.getElementById('flist-table-body');
+            tbody.innerHTML = '';
+            if (fList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-gray-400">Không có item nào đạt MinSup</td></tr>';
+                return;
+            }
+            fList.forEach(item => {
+                const row = `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2 border-b font-bold text-gray-700">${item.item}</td>
+                        <td class="p-2 border-b text-right text-blue-600">${item.count}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function highlightTableRow(index) {
+            // Remove old highlight
+            document.querySelectorAll('tr.processing').forEach(el => el.classList.remove('processing'));
+            if (index >= 0 && index < processedTransactions.length) {
+                const id = processedTransactions[index].id;
+                const row = document.getElementById(`row-${id}`);
+                if (row) row.classList.add('processing');
+            }
+        }
+
+        function switchTab(tabName) {
+            if (tabName === 'raw') {
+                document.getElementById('tab-raw').classList.remove('hidden');
+                document.getElementById('tab-flist').classList.add('hidden');
+                document.querySelectorAll('button[onclick^="switchTab"]').forEach(b => {
+                    b.classList.remove('border-blue-500', 'text-blue-600');
+                    b.classList.add('border-transparent');
+                });
+                // Should query specific button but saving specific ID for brevity
+                event.target.classList.add('border-blue-500', 'text-blue-600');
+                event.target.classList.remove('border-transparent');
+
+            } else {
+                document.getElementById('tab-raw').classList.add('hidden');
+                document.getElementById('tab-flist').classList.remove('hidden');
+                document.querySelectorAll('button[onclick^="switchTab"]').forEach(b => {
+                    b.classList.remove('border-blue-500', 'text-blue-600');
+                    b.classList.add('border-transparent');
+                });
+                event.target.classList.add('border-blue-500', 'text-blue-600');
+                event.target.classList.remove('border-transparent');
+            }
+        }
+
+        function log(msg, type="default") {
+            const consoleDiv = document.getElementById('console-log');
+            const time = new Date().toLocaleTimeString();
+            let colorClass = "text-gray-300";
+            if (type === "success") colorClass = "text-green-400";
+            if (type === "info") colorClass = "text-blue-400";
+            
+            const line = `<div class="mb-1"><span class="text-gray-500">[${time}]</span> <span class="${colorClass}">${msg}</span></div>`;
+            consoleDiv.innerHTML = line + consoleDiv.innerHTML;
+        }
+
+        function resetUI() {
+            document.getElementById('flist-table-body').innerHTML = '<tr><td colspan="2" class="p-4 text-center text-gray-400">Chưa tính toán</td></tr>';
+            document.getElementById('btn-play').disabled = true;
+            document.getElementById('btn-next').disabled = true;
+            resetTreeStructure();
+            initD3();
+            updateVisualization();
+        }
+
+        // Speed slider listener
+        document.getElementById('speedRange').addEventListener('input', function(e) {
+            animationSpeed = 5100 - parseInt(e.target.value); // Invert: High value = Low delay
+            let displaySec = (animationSpeed / 1000).toFixed(1) + "s";
+            document.getElementById('speed-val').innerText = displaySec;
+        });
+        
+        // Initial set up
+        window.addEventListener('resize', () => {
+             initD3();
+             updateVisualization();
+        });
+        
+        // Init D3 on load
+        initD3();
+        updateVisualization();
+
+    </script>
+</body>
+</html>
