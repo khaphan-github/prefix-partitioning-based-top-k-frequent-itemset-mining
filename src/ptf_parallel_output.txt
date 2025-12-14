@@ -1,17 +1,106 @@
+
+Test Case 1: top_k=8
+----------------------------------------
 Initial rmsup: 3
 Initial MH size: 8
 
 Total itemsets found: 8
+Final rmsup: 4
+
+Execution time: 0.0021 seconds
+Memory used: 0.12 MB
+1. {2}                  => Support: 10
+2. {10}                 => Support: 9
+3. {2, 10}              => Support: 8
+4. {9}                  => Support: 7
+5. {2, 9}               => Support: 7
+6. {2, 9, 10}           => Support: 5
+7. {9, 10}              => Support: 5
+8. {4}                  => Support: 4
+Execution time: 0.0022 seconds
+
+Test Case 2: top_k=5
+----------------------------------------
+Initial rmsup: 7
+Initial MH size: 5
+
+Total itemsets found: 5
 Final rmsup: 7
 
-Execution time: 0.0022 seconds
-Memory used: 0.62 MB
+Execution time: 0.0003 seconds
+Memory used: 0.00 MB
 1. {2}                  => Support: 10
-2. {2}                  => Support: 10
-3. {10}                 => Support: 9
-4. {10}                 => Support: 9
-5. {2, 10}              => Support: 8
-6. {2, 10}              => Support: 8
-7. {9}                  => Support: 7
-8. {2, 9}               => Support: 7
-Execution time: 0.0024 seconds
+2. {10}                 => Support: 9
+3. {2, 10}              => Support: 8
+4. {9}                  => Support: 7
+5. {2, 9}               => Support: 7
+Execution time: 0.0004 seconds
+
+Test Case 3: top_k=10
+----------------------------------------
+Initial rmsup: 3
+Initial MH size: 10
+
+Total itemsets found: 10
+Final rmsup: 3
+
+Execution time: 0.0004 seconds
+Memory used: 0.00 MB
+1. {2}                  => Support: 10
+2. {10}                 => Support: 9
+3. {2, 10}              => Support: 8
+4. {9}                  => Support: 7
+5. {2, 9}               => Support: 7
+6. {2, 9, 10}           => Support: 5
+7. {9, 10}              => Support: 5
+8. {4}                  => Support: 4
+9. {2, 8}               => Support: 3
+10. {4, 10}              => Support: 3
+Execution time: 0.0005 seconds
+
+Test Case 4: top_k=3
+----------------------------------------
+Initial rmsup: 8
+Initial MH size: 3
+
+Total itemsets found: 3
+Final rmsup: 8
+
+Execution time: 0.0001 seconds
+Memory used: 0.00 MB
+1. {2}                  => Support: 10
+2. {10}                 => Support: 9
+3. {2, 10}              => Support: 8
+Execution time: 0.0002 seconds
+
+Test Case 5: top_k=20
+----------------------------------------
+Initial rmsup: 2
+Initial MH size: 20
+
+Total itemsets found: 20
+Final rmsup: 2
+
+Execution time: 0.0006 seconds
+Memory used: 0.00 MB
+1. {2}                  => Support: 10
+2. {10}                 => Support: 9
+3. {2, 10}              => Support: 8
+4. {9}                  => Support: 7
+5. {2, 9}               => Support: 7
+6. {2, 9, 10}           => Support: 5
+7. {9, 10}              => Support: 5
+8. {4}                  => Support: 4
+9. {2, 4}               => Support: 3
+10. {2, 4, 10}           => Support: 3
+11. {2, 8, 9}            => Support: 3
+12. {8}                  => Support: 3
+13. {2, 8}               => Support: 3
+14. {8, 9}               => Support: 3
+15. {4, 10}              => Support: 3
+16. {5}                  => Support: 2
+17. {5, 8}               => Support: 2
+18. {4, 9}               => Support: 2
+19. {5, 9}               => Support: 2
+20. {5, 10}              => Support: 2
+Execution time: 0.0007 seconds

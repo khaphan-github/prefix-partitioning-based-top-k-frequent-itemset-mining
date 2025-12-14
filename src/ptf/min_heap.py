@@ -15,7 +15,20 @@ class MinHeapTopK:
         """
         Insert itemset with support into the min-heap.
         Maintains top-k invariant: heap size <= k
+        Handles duplicates by keeping the highest support value.
         """
+        # If itemset already exists, update to higher support if needed
+        if itemset in self.itemset_map:
+            current_support = self.itemset_map[itemset]
+            if support > current_support:
+                # Update to higher support
+                self.itemset_map[itemset] = support
+                # Rebuild heap with updated values
+                self.heap = [(self.itemset_map.get(item, sup), item) 
+                             for sup, item in self.heap]
+                heapq.heapify(self.heap)
+            return
+        
         if len(self.heap) < self.k:
             heapq.heappush(self.heap, (support, itemset))
             self.itemset_map[itemset] = support
@@ -23,7 +36,8 @@ class MinHeapTopK:
             # Replace minimum element with new higher-support itemset
             old_support, old_itemset = heapq.heappushpop(
                 self.heap, (support, itemset))
-            del self.itemset_map[old_itemset]
+            if old_itemset in self.itemset_map:
+                del self.itemset_map[old_itemset]
             self.itemset_map[itemset] = support
 
     def min_support(self) -> int:

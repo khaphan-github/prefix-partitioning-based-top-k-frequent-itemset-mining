@@ -19,7 +19,7 @@ if __name__ == "__main__":
             report_file.write("-" * 40 + "\n")
             try:
                 with ExecutionTimer(f"Running {label}"):
-                    run_ptf_algorithm("data/pumsb_spmf.txt",
+                    run_ptf_algorithm("data/sample.txt",
                                       top_k=top_k, output_file=report_file)
             except FileNotFoundError as e:
                 report_file.write(f"Error: {e}\n")

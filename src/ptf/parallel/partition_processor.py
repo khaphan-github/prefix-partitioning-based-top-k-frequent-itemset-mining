@@ -183,15 +183,15 @@ class ParallelPartitionProcessor:
         
         Algorithm:
         1. Create new empty top-k min-heap
-        2. Insert all itemsets from initial heap
-        3. For each local heap from workers:
+        2. For each local heap from workers:
            - Insert all itemsets into merged heap
-        4. MinHeapTopK maintains top-k invariant automatically
-        5. Return merged heap
+           (Each local heap already contains initial itemsets)
+        3. MinHeapTopK maintains top-k invariant automatically
+        4. Return merged heap
         
         Args:
             local_results: List of (local_MH, local_rmsup) from workers
-            initial_min_heap: Original MH before parallelization
+            initial_min_heap: Original MH before parallelization (not reinserted to avoid duplicates)
             top_k: k value for final min-heap
         
         Returns:
@@ -199,13 +199,15 @@ class ParallelPartitionProcessor:
         """
         merged_heap = MinHeapTopK(top_k)
         
-        # Insert all itemsets from initial heap
-        for support, itemset in initial_min_heap.get_all():
-            merged_heap.insert(support=support, itemset=itemset)
-        
         # Insert all itemsets from local heaps (workers)
+        # Note: initial itemsets are already in each local heap, so we don't insert them again
         for local_mh, _ in local_results:
             for support, itemset in local_mh.get_all():
+                merged_heap.insert(support=support, itemset=itemset)
+        
+        # If no local results, use initial heap as fallback
+        if not merged_heap.get_all() and initial_min_heap.get_all():
+            for support, itemset in initial_min_heap.get_all():
                 merged_heap.insert(support=support, itemset=itemset)
         
         # Get final rmsup (minimum support in top-k)
