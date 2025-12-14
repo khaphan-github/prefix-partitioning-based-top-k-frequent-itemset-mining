@@ -328,7 +328,7 @@ class TestFilterPartitions:
             # Verify SglPartition.execute was called with correct parameters
             mock_execute.assert_called_once()
             call_kwargs = mock_execute.call_args[1]
-            assert call_kwargs['partition'] == 1
+            assert call_kwargs['partition_item'] == 1
             assert call_kwargs['min_heap'] is min_heap
             # promising_items may have been filtered
             assert isinstance(call_kwargs['promising_items'], list)
