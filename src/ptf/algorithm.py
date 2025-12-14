@@ -26,25 +26,49 @@ class PrefixPartitioningbasedTopKAlgorithm:
 
         return min_heap, rmsup
 
-    def build_promissing_item_arrays(self, min_heap: MinHeapTopK, all_items):
+    def build_promissing_item_arrays(self, min_heap: MinHeapTopK, all_items, con_map: dict, rmsup: int):
         '''
-        output:  [{ item1, item2, ...}, ...]
-        {1: [], 2: [4, 10, 2], 3: [], 4: [4], 5: [], 6: [], 7: [], 8: [], 9: [10, 2, 9], 10: [10]}
+        Build promising items arrays with refinement.
+        
+        Step 1: Add items from min_heap (1-itemset and 2-itemset)
+        Step 2: Refine: Keep only items with sufficient support
+        
+        output:  {item: [promising_items], ...}
         '''
         promising_items_arr = {}
 
         for item in all_items:
             promising_items_arr[item] = []
 
-        # Add items from min_heap
+        # Step 1: Add items from min_heap
         for support, itemset in min_heap.get_all():
             if len(itemset) == 1:
                 x_i = itemset[0]
                 promising_items_arr[x_i].append(x_i)
 
-            if len(itemset) == 2:
-                x_i, x_j = itemset
+            elif len(itemset) == 2:
+                # Ensure x_i < x_j for consistent partition assignment
+                items = sorted(itemset)
+                x_i, x_j = items[0], items[1]
                 promising_items_arr[x_i].append(x_j)
+
+        # Step 2: Refine AR_i based on rmsup and con_map
+        for x_i in all_items:
+            new_arr = []
+            for y in promising_items_arr[x_i]:
+                # Get support for item y in partition P_{x_i}
+                if y == x_i:
+                    # Check support of 1-itemset {x_i}
+                    sup = con_map.get(frozenset([x_i]), 0)
+                else:
+                    # Check support of 2-itemset {x_i, y}
+                    sup = con_map.get(frozenset([x_i, y]), 0)
+                
+                # Keep item only if support >= rmsup
+                if sup >= rmsup:
+                    new_arr.append(y)
+            
+            promising_items_arr[x_i] = sorted(set(new_arr))
 
         return promising_items_arr
 
@@ -56,13 +80,17 @@ class PrefixPartitioningbasedTopKAlgorithm:
         1. Remove non-promising items based on support threshold
         2. Skip if |AR_i| <= 2
         3. Otherwise, build vertical representation and process the partition
+        
+        Returns:
+            Tuple (min_heap, rmsup): Updated heap and minimum support threshold
         '''
         for partition in partitions:
             # Promising items in current partition
             for promissing_item in promissing_arr[partition]:
                 partition_support = con_map.get((partition,), 0)
                 if promissing_item == partition and partition_support <= rmsup:
-                    promissing_arr[partition] = []
+                    # TODO: Tai sao khogn remove buoc nay.
+                    # promissing_arr[partition] = []
                     break
 
                 if promissing_item > partition:
@@ -76,14 +104,16 @@ class PrefixPartitioningbasedTopKAlgorithm:
                 continue
 
             # Process the partition with partition data
-            if partitioner and hasattr(partitioner, 'partitions'):
-                partition_data = partitioner.partitions.get(partition, [])
+            if partitioner and hasattr(partitioner, 'prefix_partitions'):
+                partition_data = partitioner.prefix_partitions.get(partition, [])
 
                 # Process the partition (vertical representation built inside execute)
-                SglPartition.execute(
+                min_heap, rmsup = SglPartition.execute(
                     partition_item=partition,
                     promising_items=promissing_arr[partition],
                     partition_data=partition_data,
                     min_heap=min_heap,
                     rmsup=rmsup
                 )
+        
+        return min_heap, rmsup

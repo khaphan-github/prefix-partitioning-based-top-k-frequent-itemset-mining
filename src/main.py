@@ -31,9 +31,11 @@ if __name__ == "__main__":
     promissing_arr = ptf.build_promissing_item_arrays(
         min_heap=min_heap,
         all_items=db.all_items,
+        con_map=co_occurrence_numbers.con_map,
+        rmsup=rmsup
     )
 
-    ptf.filter_partitions(
+    min_heap, rmsup = ptf.filter_partitions(
         promissing_arr=promissing_arr,
         partitions=db.all_items,
         min_heap=min_heap,
