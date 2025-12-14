@@ -2,31 +2,48 @@
 '''
 
 
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Set
 from ptf.min_heap import MinHeapTopK
 from ptf.sgl_partition import SglPartition
-from ptf.sgl_partition_hybrid import SglPartitionHybrid
+from ptf.hybrid_vertical_storage.sgl_partition_hybrid import SglPartitionHybrid
+from ptf.hybrid_vertical_storage.sgl_partition_hybrid_candidate_pruning import SglPartitionHybridCandidatePruning
 
 
 class PrefixPartitioningbasedTopKAlgorithm:
-    def __init__(self, top_k: int, use_hybrid_storage: bool = True):
+    def __init__(self, top_k: int, use_hybrid_storage: bool = True, use_candidate_pruning: bool = False):
         """
-        Initialize PTF algorithm with optional hybrid vertical storage.
+        Initialize PTF algorithm with optional enhancements.
         
         Args:
             top_k: Number of top-k frequent itemsets to find
-            use_hybrid_storage: If True, use SglPartitionHybrid (optimized).
-                              If False, use traditional SglPartition.
-                              Default: True (recommended)
+            use_hybrid_storage: If True, use hybrid vertical storage (tid-list/dif-list/bit-vector).
+                               If False, use traditional list-based storage.
+                               Default: True (recommended)
+            use_candidate_pruning: If True, use Candidate Pruning (timeliness + last-item).
+                                  Only applies when use_hybrid_storage=True.
+                                  Default: False
         """
         self.top_k = top_k
         self.use_hybrid_storage = use_hybrid_storage
-        self.partition_processor = SglPartitionHybrid if use_hybrid_storage else SglPartition
+        self.use_candidate_pruning = use_candidate_pruning and use_hybrid_storage
+        
+        # Select partition processor based on configuration
+        if use_candidate_pruning:
+            self.partition_processor = SglPartitionHybridCandidatePruning
+        elif use_hybrid_storage:
+            self.partition_processor = SglPartitionHybrid
+        else:
+            self.partition_processor = SglPartition
+        
+        # Track top-2 itemsets for last-item pruning
+        self.top2_set: Set[frozenset] = set()
 
     def initialize_mh_and_rmsup(self, con_list: List[Tuple[set, int]]):
         '''
         Min heap lay top k item trong co-occurrence list
         rmsub la item dau tien.
+        
+        Also extracts top-2 itemsets for candidate pruning.
         '''
 
         min_heap = MinHeapTopK(self.top_k)
@@ -35,6 +52,10 @@ class PrefixPartitioningbasedTopKAlgorithm:
             itemset, support = con_list[con]
             min_heap.insert(support=support, itemset=tuple(itemset))
         rmsup = min_heap.min_support()
+        
+        # Extract top-2 itemsets for last-item pruning if using candidate pruning
+        if self.use_candidate_pruning:
+            self.top2_set = self._extract_top2_itemsets(min_heap)
 
         return min_heap, rmsup
 
@@ -121,12 +142,44 @@ class PrefixPartitioningbasedTopKAlgorithm:
 
                 # Process the partition using selected processor
                 # (vertical representation built inside execute)
-                min_heap, rmsup = self.partition_processor.execute(
-                    partition_item=partition,
-                    promising_items=promissing_arr[partition],
-                    partition_data=partition_data,
-                    min_heap=min_heap,
-                    rmsup=rmsup
-                )
+                if self.use_candidate_pruning:
+                    # Use candidate pruning version that tracks top2_set
+                    min_heap, rmsup, self.top2_set = self.partition_processor.execute(
+                        partition_item=partition,
+                        promising_items=promissing_arr[partition],
+                        partition_data=partition_data,
+                        min_heap=min_heap,
+                        rmsup=rmsup,
+                        top2_set=self.top2_set
+                    )
+                else:
+                    # Use standard processor
+                    min_heap, rmsup = self.partition_processor.execute(
+                        partition_item=partition,
+                        promising_items=promissing_arr[partition],
+                        partition_data=partition_data,
+                        min_heap=min_heap,
+                        rmsup=rmsup
+                    )
         
         return min_heap, rmsup
+    
+    @staticmethod
+    def _extract_top2_itemsets(min_heap: MinHeapTopK) -> Set[frozenset]:
+        """
+        Extract all 2-itemsets from min_heap into a set for O(1) lookup.
+        
+        Args:
+            min_heap: MinHeapTopK containing top-k itemsets
+        
+        Returns:
+            Set of frozenset({a, b}) for all 2-itemsets in min_heap
+        """
+        top2_set = set()
+        
+        for support, itemset in min_heap.get_all():
+            if len(itemset) == 2:
+                pair = frozenset(itemset)
+                top2_set.add(pair)
+        
+        return top2_set

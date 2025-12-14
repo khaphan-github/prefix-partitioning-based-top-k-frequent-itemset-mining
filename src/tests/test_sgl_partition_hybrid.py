@@ -6,7 +6,7 @@ Verifies that the new hybrid version produces identical results to the old SglPa
 
 import pytest
 from ptf.sgl_partition import SglPartition
-from ptf.sgl_partition_hybrid import SglPartitionHybrid
+from ptf.hybrid_vertical_storage.sgl_partition_hybrid import SglPartitionHybrid
 from ptf.min_heap import MinHeapTopK
 
 
