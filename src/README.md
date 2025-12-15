@@ -1,4 +1,5 @@
 # Run
+cd src
 pip install -r requirments.txt
 python3 main_with_json_config.py config_sequential.json
 python3 main_with_json_config.py config_parallel.json
