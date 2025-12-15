@@ -121,11 +121,9 @@ def run_ptf_algorithm_parallel_with_timing(
         >>> print(f"Execution time: {exec_time:.4f}s")
     """
     with track_execution() as metrics:
-        start_time = time.time()
         run_ptf_algorithm_parallel(file_path, top_k, output_file, num_workers)
-        end_time = time.time()
 
-    execution_time = end_time - start_time
+    execution_time = metrics.execution_time
     write_output(f"Execution time: {execution_time:.4f} seconds", output_file)
 
     if metrics_json:

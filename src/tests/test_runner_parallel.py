@@ -277,8 +277,8 @@ class TestRunPtfAlgorithmParallel:
     def test_run_ptf_algorithm_parallel_metrics_tracking(self, mock_track):
         """Test that parallel execution metrics are properly tracked."""
         mock_metrics = MagicMock()
-        mock_metrics.execution_time = 2.345
-        mock_metrics.memory_used = 78.90
+        mock_metrics.execution_time_ms = 2345.0
+        mock_metrics.memory_used_kb = 78.90
         mock_track.return_value.__enter__.return_value = mock_metrics
         
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
@@ -290,7 +290,7 @@ class TestRunPtfAlgorithmParallel:
             run_ptf_algorithm_parallel(temp_file, top_k=2, output_file=output_buffer)
             
             output = output_buffer.getvalue()
-            assert "2.3450" in output or "2.345" in output
+            assert "2345.00" in output
         finally:
             os.unlink(temp_file)
 

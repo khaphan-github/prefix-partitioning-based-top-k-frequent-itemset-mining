@@ -79,16 +79,13 @@ def run_ptf_algorithm_with_timing(file_path: str, top_k: int = 8, output_file=No
     Returns:
         Execution time in seconds
     """
-    start_time = time.time()
-    run_ptf_algorithm(file_path, top_k, output_file)
-    end_time = time.time()
+    with track_execution() as metrics:
+        run_ptf_algorithm(file_path, top_k, output_file)
     
-    execution_time = end_time - start_time
+    execution_time = metrics.execution_time
     write_output(f"Execution time: {execution_time:.4f} seconds", output_file)
     
     if metrics_json:
-        with track_execution() as metrics:
-            pass  # Metrics already captured above
         MetricsReporter.save_metrics(
             metrics,
             metrics_json,

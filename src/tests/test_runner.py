@@ -215,8 +215,8 @@ class TestRunPtfAlgorithm:
     def test_run_ptf_algorithm_metrics_tracking(self, mock_track):
         """Test that execution metrics are properly tracked."""
         mock_metrics = MagicMock()
-        mock_metrics.execution_time = 1.234
-        mock_metrics.memory_used = 56.78
+        mock_metrics.execution_time_ms = 1234.0
+        mock_metrics.memory_used_kb = 56.78
         mock_track.return_value.__enter__.return_value = mock_metrics
 
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
@@ -228,7 +228,7 @@ class TestRunPtfAlgorithm:
             run_ptf_algorithm(temp_file, top_k=2, output_file=output_buffer)
 
             output = output_buffer.getvalue()
-            assert "1.2340" in output or "1.234" in output
+            assert "1234.00" in output
         finally:
             os.unlink(temp_file)
 
