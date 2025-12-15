@@ -6,6 +6,10 @@
 - [x] Partitioning Strategy
 - [x] Some Pre‑constructed Structures
 - [x] The maintenance of the promissing items  (Issue)
-- [ ] Processing the partition sequentially
+- [x] Processing the partition sequentially
+- [x] Hyprid Storate & Pruning: 
+- [x] Benchmark
+- [ ] Implement parallel
+- [ ] Viualize
 ## Ref
 - DATATASET: https://www.philippe-fournier-viger.com/spmf/index.php?link=datasets.php
