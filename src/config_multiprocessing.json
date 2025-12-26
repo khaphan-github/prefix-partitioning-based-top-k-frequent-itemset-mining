@@ -1,0 +1,9 @@
+{
+  "top_k": 1000,
+  "parallel": true,
+  "use_multiprocessing": true,
+  "num_workers": 2,
+  "input_dataset_path": "data/pumsb_spmf.txt",
+  "output_report": "benchmark/reports/pumsb_spmf/multiprocessing/",
+  "save_metrics": true
+}

@@ -1,7 +1,7 @@
 {
-  "top_k": 20,
+  "top_k": 1000,
   "parallel": false,
-  "input_dataset_path": "data/accidents_spmf.txt",
-  "output_report": "benchmark/reports/accidents_spmf/sequential/",
+  "input_dataset_path": "data/pumsb_spmf.txt",
+  "output_report": "benchmark/reports/pumsb_spmf/sequential/",
   "save_metrics": true
 }
