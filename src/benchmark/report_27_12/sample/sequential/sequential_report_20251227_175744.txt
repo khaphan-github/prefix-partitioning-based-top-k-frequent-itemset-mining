@@ -1,0 +1,74 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-27T17:57:44.971244
+======================================================================
+
+Configuration:
+  Algorithm: Sequential PTF
+  Top-k: 250
+  Input Dataset: ./data/data_set/sample.txt
+
+Initial rmsup: 1
+Initial MH size: 35
+
+Total itemsets found: 55
+Final rmsup: 1
+
+1. {2}                  => Support: 10
+2. {10}                 => Support: 9
+3. {2, 10}              => Support: 8
+4. {9}                  => Support: 7
+5. {2, 9}               => Support: 7
+6. {2, 9, 10}           => Support: 5
+7. {9, 10}              => Support: 5
+8. {4}                  => Support: 4
+9. {2, 4}               => Support: 3
+10. {2, 4, 10}           => Support: 3
+11. {2, 8, 9}            => Support: 3
+12. {8}                  => Support: 3
+13. {2, 8}               => Support: 3
+14. {8, 9}               => Support: 3
+15. {4, 10}              => Support: 3
+16. {2, 4, 9}            => Support: 2
+17. {2, 4, 9, 10}        => Support: 2
+18. {2, 5}               => Support: 2
+19. {2, 5, 8}            => Support: 2
+20. {2, 5, 8, 9}         => Support: 2
+21. {2, 5, 8, 9, 10}     => Support: 2
+22. {2, 5, 8, 10}        => Support: 2
+23. {2, 5, 9}            => Support: 2
+24. {2, 5, 9, 10}        => Support: 2
+25. {2, 5, 10}           => Support: 2
+26. {2, 8, 9, 10}        => Support: 2
+27. {2, 8, 10}           => Support: 2
+28. {3}                  => Support: 2
+29. {3, 4}               => Support: 2
+30. {4, 9, 10}           => Support: 2
+31. {5}                  => Support: 2
+32. {5, 8, 9}            => Support: 2
+33. {5, 8, 9, 10}        => Support: 2
+34. {5, 8, 10}           => Support: 2
+35. {5, 9, 10}           => Support: 2
+36. {5, 8}               => Support: 2
+37. {8, 9, 10}           => Support: 2
+38. {8, 10}              => Support: 2
+39. {4, 9}               => Support: 2
+40. {5, 9}               => Support: 2
+41. {5, 10}              => Support: 2
+42. {1}                  => Support: 1
+43. {1, 2}               => Support: 1
+44. {1, 9}               => Support: 1
+45. {1, 10}              => Support: 1
+46. {2, 3}               => Support: 1
+47. {2, 6}               => Support: 1
+48. {4, 5}               => Support: 1
+49. {6}                  => Support: 1
+50. {7}                  => Support: 1
+51. {4, 8}               => Support: 1
+52. {3, 9}               => Support: 1
+53. {3, 10}              => Support: 1
+54. {6, 10}              => Support: 1
+55. {7, 10}              => Support: 1
+Execution time: 1.07 ms
+Memory used: 128.00 KB
+Execution time: 0.0013 seconds
