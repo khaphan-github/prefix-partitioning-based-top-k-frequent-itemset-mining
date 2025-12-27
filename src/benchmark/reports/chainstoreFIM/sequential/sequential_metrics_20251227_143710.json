@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-12-27T14:38:23.155245",
+  "algorithm": "PTF",
+  "metrics": {
+    "execution_time_ms": 73001.82843208313,
+    "memory_used_kb": 1485236.0
+  },
+  "parameters": {
+    "top_k": 500
+  }
+}

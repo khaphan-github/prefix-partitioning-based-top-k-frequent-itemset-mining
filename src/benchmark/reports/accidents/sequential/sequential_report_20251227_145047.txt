@@ -1,0 +1,29 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-27T14:50:47.332120
+======================================================================
+
+Configuration:
+  Algorithm: Sequential PTF
+  Top-k: 10
+  Input Dataset: data/data_set/accidents.txt
+
+Initial rmsup: 331648
+Initial MH size: 10
+
+Total itemsets found: 10
+Final rmsup: 332165
+
+1. {17}                 => Support: 340151
+2. {12}                 => Support: 339601
+3. {12, 17}             => Support: 339569
+4. {18}                 => Support: 339095
+5. {17, 18}             => Support: 339063
+6. {12, 18}             => Support: 338921
+7. {12, 17, 18}         => Support: 338889
+8. {16}                 => Support: 332414
+9. {16, 17}             => Support: 332382
+10. {12, 16}             => Support: 332165
+Execution time: 18883.53 ms
+Memory used: 2605160.00 KB
+Execution time: 20.6850 seconds

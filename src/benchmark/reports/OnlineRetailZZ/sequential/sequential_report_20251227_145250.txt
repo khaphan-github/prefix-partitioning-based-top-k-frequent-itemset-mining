@@ -1,0 +1,29 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-27T14:52:50.285769
+======================================================================
+
+Configuration:
+  Algorithm: Sequential PTF
+  Top-k: 10
+  Input Dataset: data/data_set/OnlineRetailZZ.txt
+
+Initial rmsup: 29159
+Initial MH size: 10
+
+Total itemsets found: 10
+Final rmsup: 29159
+
+1. {1943}               => Support: 54430
+2. {1534}               => Support: 53351
+3. {225}                => Support: 51911
+4. {1816}               => Support: 42902
+5. {1097}               => Support: 38714
+6. {1834}               => Support: 35126
+7. {2339}               => Support: 33748
+8. {720}                => Support: 30066
+9. {1680}               => Support: 29526
+10. {1534, 1943}         => Support: 29159
+Execution time: 2521.81 ms
+Memory used: 368960.00 KB
+Execution time: 2.8031 seconds

@@ -1,0 +1,29 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-27T14:53:01.829800
+======================================================================
+
+Configuration:
+  Algorithm: Sequential PTF
+  Top-k: 10
+  Input Dataset: data/data_set/SUSY.txt
+
+Initial rmsup: 5597529
+Initial MH size: 10
+
+Total itemsets found: 10
+Final rmsup: 5597529
+
+1. {10}                 => Support: 9098183
+2. {10, 40}             => Support: 7000879
+3. {10, 110}            => Support: 6845759
+4. {10, 150}            => Support: 6764638
+5. {10, 104}            => Support: 6510646
+6. {10, 90}             => Support: 6410224
+7. {10, 70}             => Support: 6299383
+8. {10, 120}            => Support: 6135293
+9. {10, 140}            => Support: 6014779
+10. {10, 160}            => Support: 5597529
+Execution time: 108946.11 ms
+Memory used: 15718216.00 KB
+Execution time: 117.4791 seconds

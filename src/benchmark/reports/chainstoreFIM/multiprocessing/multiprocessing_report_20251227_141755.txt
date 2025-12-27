@@ -1,0 +1,30 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-27T14:17:55.586840
+======================================================================
+
+Configuration:
+  Algorithm: Multiprocessing PTF (True Parallel)
+  Top-k: 10
+  Input Dataset: data/data_set/chainstoreFIM.txt
+  Workers: 2
+
+Initial rmsup: 25514
+Initial MH size: 10
+
+Total itemsets found: 10
+Final rmsup: 25514
+
+Execution time: 70564.91 ms
+Memory used: 19903976.00 KB
+1. {39684}              => Support: 63818
+2. {16977}              => Support: 58683
+3. {16967}              => Support: 57097
+4. {16978}              => Support: 38036
+5. {16975}              => Support: 36190
+6. {39388}              => Support: 35043
+7. {13743}              => Support: 32564
+8. {5666}               => Support: 27443
+9. {39688}              => Support: 26056
+10. {16881}              => Support: 25514
+Execution time: 76.7504 seconds

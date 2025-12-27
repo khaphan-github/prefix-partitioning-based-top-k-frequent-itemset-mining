@@ -12,7 +12,7 @@ pip install -r requirments.txt
 | Lệnh                                                      | Mô tả           |
 | --------------------------------------------------------- | --------------- |
 | `python3 main_with_json_config.py config_sequential.json` | Xử lý tuần tự   |
-| `python3 main_with_json_config.py config_parallel.json`   | Xử lý song song |
+| `python3 main_with_json_config.py config_multiprocessing.json`   | Xử lý song song |
 | `python3 main.py`                                         | Chạy mặc định   |
 
 ## Kiểm thử

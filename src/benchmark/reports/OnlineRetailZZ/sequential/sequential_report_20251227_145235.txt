@@ -1,0 +1,119 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-27T14:52:35.570691
+======================================================================
+
+Configuration:
+  Algorithm: Sequential PTF
+  Top-k: 100
+  Input Dataset: data/data_set/OnlineRetailZZ.txt
+
+Initial rmsup: 6436
+Initial MH size: 100
+
+Total itemsets found: 100
+Final rmsup: 6751
+
+1. {1943}               => Support: 54430
+2. {1534}               => Support: 53351
+3. {225}                => Support: 51911
+4. {1816}               => Support: 42902
+5. {1097}               => Support: 38714
+6. {1834}               => Support: 35126
+7. {2339}               => Support: 33748
+8. {720}                => Support: 30066
+9. {1680}               => Support: 29526
+10. {1534, 1943}         => Support: 29159
+11. {547}                => Support: 25131
+12. {358}                => Support: 24403
+13. {426}                => Support: 21461
+14. {1215}               => Support: 21139
+15. {1394}               => Support: 20842
+16. {2375}               => Support: 20813
+17. {1816, 1834}         => Support: 20265
+18. {324}                => Support: 19316
+19. {225, 1215}          => Support: 18970
+20. {90}                 => Support: 18695
+21. {1336}               => Support: 18525
+22. {1084}               => Support: 17037
+23. {1989}               => Support: 16998
+24. {1126}               => Support: 16261
+25. {1582}               => Support: 15637
+26. {1394, 1989}         => Support: 15134
+27. {2183}               => Support: 14559
+28. {2027}               => Support: 14333
+29. {1605}               => Support: 14142
+30. {1534, 1582}         => Support: 14136
+31. {225, 1336}          => Support: 13793
+32. {461}                => Support: 13280
+33. {114}                => Support: 13146
+34. {708}                => Support: 12981
+35. {2399}               => Support: 12708
+36. {1721}               => Support: 12472
+37. {1017}               => Support: 12125
+38. {479}                => Support: 12014
+39. {349}                => Support: 11697
+40. {2202}               => Support: 11689
+41. {21}                 => Support: 11401
+42. {1165}               => Support: 11218
+43. {1126, 2183}         => Support: 11093
+44. {181}                => Support: 10962
+45. {2060}               => Support: 10831
+46. {1142}               => Support: 10425
+47. {2363}               => Support: 9975
+48. {2395}               => Support: 9880
+49. {426, 1534}          => Support: 9860
+50. {1264}               => Support: 9798
+51. {1603}               => Support: 9760
+52. {426, 479}           => Support: 9752
+53. {90, 1943}           => Support: 9590
+54. {225, 720}           => Support: 9532
+55. {2231}               => Support: 9512
+56. {349, 1142}          => Support: 9505
+57. {349, 1142, 2363}    => Support: 9505
+58. {349, 2363}          => Support: 9505
+59. {1142, 2363}         => Support: 9505
+60. {1862}               => Support: 9402
+61. {1594}               => Support: 9326
+62. {489}                => Support: 9180
+63. {99}                 => Support: 9146
+64. {1825}               => Support: 9120
+65. {1046}               => Support: 9119
+66. {754}                => Support: 8447
+67. {762}                => Support: 8385
+68. {225, 1834}          => Support: 8334
+69. {225, 1816}          => Support: 8295
+70. {1456}               => Support: 8234
+71. {1182}               => Support: 8205
+72. {114, 1534}          => Support: 8189
+73. {1407}               => Support: 8185
+74. {90, 1534}           => Support: 8153
+75. {644}                => Support: 8045
+76. {396}                => Support: 8001
+77. {1324}               => Support: 8000
+78. {479, 1534}          => Support: 7816
+79. {1012}               => Support: 7793
+80. {225, 2339}          => Support: 7609
+81. {1084, 1097}         => Support: 7592
+82. {209}                => Support: 7587
+83. {1084, 2183}         => Support: 7561
+84. {1617}               => Support: 7559
+85. {574}                => Support: 7381
+86. {90, 1534, 1943}     => Support: 7294
+87. {881}                => Support: 7216
+88. {308}                => Support: 7205
+89. {2380}               => Support: 7141
+90. {355}                => Support: 7051
+91. {225, 1816, 1834}    => Support: 6959
+92. {983}                => Support: 6944
+93. {1235}               => Support: 6910
+94. {2232}               => Support: 6899
+95. {754, 1012}          => Support: 6892
+96. {2400}               => Support: 6874
+97. {1097, 1126}         => Support: 6850
+98. {860}                => Support: 6777
+99. {2407}               => Support: 6763
+100. {945}                => Support: 6751
+Execution time: 2626.35 ms
+Memory used: 373572.00 KB
+Execution time: 2.9077 seconds

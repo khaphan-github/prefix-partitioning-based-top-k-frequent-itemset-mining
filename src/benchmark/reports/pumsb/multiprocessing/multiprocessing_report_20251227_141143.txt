@@ -1,0 +1,30 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-27T14:11:43.171919
+======================================================================
+
+Configuration:
+  Algorithm: Multiprocessing PTF (True Parallel)
+  Top-k: 10
+  Input Dataset: data/data_set/pumsb.txt
+  Workers: 2
+
+Initial rmsup: 48156
+Initial MH size: 10
+
+Total itemsets found: 10
+Final rmsup: 48156
+
+Execution time: 12299.29 ms
+Memory used: 1796820.00 KB
+1. {4439}               => Support: 48944
+2. {7063}               => Support: 48628
+3. {171}                => Support: 48572
+4. {4439, 7063}         => Support: 48529
+5. {171, 4439}          => Support: 48470
+6. {181}                => Support: 48258
+7. {185}                => Support: 48258
+8. {181, 185}           => Support: 48258
+9. {4429}               => Support: 48193
+10. {171, 7063}          => Support: 48156
+Execution time: 13.4638 seconds
