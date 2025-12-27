@@ -31,14 +31,10 @@ def _process_partition_worker(work_item: dict, partition_class) -> Tuple[dict, i
     Returns:
         Tuple of (itemsets_dict, local_rmsup)
     """
-    # Create local min-heap for this process
+    # Create EMPTY local min-heap for this process
     local_heap = MinHeapTopK(work_item['top_k'])
     
-    # Insert initial itemsets
-    for support, itemset in work_item['initial_itemsets']:
-        local_heap.insert(support=support, itemset=itemset)
-    
-    # Execute partition processing
+    # Execute partition processing with empty heap and global threshold
     result = partition_class.execute(
         partition_item=work_item['partition_item'],
         promising_items=work_item['promising_items'],
@@ -121,9 +117,6 @@ class MultiprocessingPartitionProcessor:
         Returns:
             Tuple of (merged_min_heap, final_rmsup)
         """
-        # Get initial itemsets for workers
-        initial_itemsets = initial_min_heap.get_all()
-        
         # Step 1: Build work items from valid partitions
         work_items = []
         for partition_item in partitions:
@@ -142,8 +135,7 @@ class MultiprocessingPartitionProcessor:
                 'promising_items': promising_items,
                 'partition_data': partition_data,
                 'initial_rmsup': initial_rmsup,
-                'top_k': top_k,
-                'initial_itemsets': initial_itemsets
+                'top_k': top_k
             }
             work_items.append(work_item)
         
@@ -207,14 +199,13 @@ class MultiprocessingPartitionProcessor:
         """
         merged_heap = MinHeapTopK(top_k)
         
-        # Insert all itemsets from local results (processes)
+        # First insert initial itemsets
+        for support, itemset in initial_min_heap.get_all():
+            merged_heap.insert(support=support, itemset=itemset)
+        
+        # Then insert itemsets from worker results
         for itemsets_dict, _ in local_results:
             for itemset, support in itemsets_dict.items():
-                merged_heap.insert(support=support, itemset=itemset)
-        
-        # If no local results, use initial heap as fallback
-        if not merged_heap.get_all() and initial_min_heap.get_all():
-            for support, itemset in initial_min_heap.get_all():
                 merged_heap.insert(support=support, itemset=itemset)
         
         # Get final rmsup (minimum support in top-k)

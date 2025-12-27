@@ -178,7 +178,7 @@ class HybridTidSetIntersection:
         Intersect tid-sets represented as dif-lists.
         
         D1, D2 are complements: transactions NOT in original sets.
-        L_intersect = {1..ni} \ (D1 ∪ D2)
+        L_intersect = {1..ni} \\ (D1 ∪ D2)  # Double backslash for set difference
         
         Args:
             D1: Sorted dif-list 1 (tid NOT in set 1)
@@ -230,7 +230,7 @@ class HybridTidSetIntersection:
         
         L = transactions in set 1
         D = transactions NOT in set 2
-        Result = L \ D (tids in L that are not in D)
+        Result = L \\ D (tids in L that are not in D)  # Double backslash for set difference
         
         Args:
             L: Sorted tid-list
