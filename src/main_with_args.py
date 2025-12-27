@@ -109,10 +109,10 @@ def run_algorithm(config: Dict) -> bool:
 
         # Generate report filename based on algorithm type
         if parallel:
-            if use_multiprocessing:
-                algorithm_name = "multiprocessing"
-            else:
-                algorithm_name = "parallel"
+            algorithm_name = "multiprocessing"
+            # if use_multiprocessing:
+            # else:
+            #     algorithm_name = "parallel"
         else:
             algorithm_name = "sequential"
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
