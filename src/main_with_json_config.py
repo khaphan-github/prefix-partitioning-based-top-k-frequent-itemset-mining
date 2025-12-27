@@ -105,6 +105,7 @@ def run_algorithm(config: Dict) -> bool:
         # Import here to avoid import errors if ptf module not available
         from ptf.runner import run_ptf_algorithm_with_timing
         from ptf.runner_parallel import run_ptf_algorithm_parallel_with_timing
+        from ptf.runner_multiprocessing import run_ptf_algorithm_multiprocessing_with_timing
         
         # Extract configuration
         top_k = int(config['top_k'])
@@ -112,6 +113,7 @@ def run_algorithm(config: Dict) -> bool:
         output_base = config['output_report']
         parallel = config.get('parallel', False)
         num_workers = config.get('num_workers', None)
+        use_multiprocessing = config.get('use_multiprocessing', False)
         save_metrics = config.get('save_metrics', True)
         
         # Handle output_report as folder path
@@ -119,7 +121,13 @@ def run_algorithm(config: Dict) -> bool:
         output_dir.mkdir(parents=True, exist_ok=True)
         
         # Generate report filename based on algorithm type
-        algorithm_name = "parallel" if parallel else "sequential"
+        if parallel:
+            if use_multiprocessing:
+                algorithm_name = "multiprocessing"
+            else:
+                algorithm_name = "parallel"
+        else:
+            algorithm_name = "sequential"
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_filename = f"{algorithm_name}_report_{timestamp}.txt"
         output_report = str(output_dir / report_filename)
@@ -138,7 +146,13 @@ def run_algorithm(config: Dict) -> bool:
             f.write("=" * 70 + "\n\n")
             
             f.write(f"Configuration:\n")
-            f.write(f"  Algorithm: {'Parallel PTF' if parallel else 'Sequential PTF'}\n")
+            if parallel:
+                if use_multiprocessing:
+                    f.write(f"  Algorithm: Multiprocessing PTF (True Parallel)\n")
+                else:
+                    f.write(f"  Algorithm: Parallel PTF (Threading)\n")
+            else:
+                f.write(f"  Algorithm: Sequential PTF\n")
             f.write(f"  Top-k: {top_k}\n")
             f.write(f"  Input Dataset: {input_path}\n")
             if parallel and num_workers:
@@ -150,15 +164,26 @@ def run_algorithm(config: Dict) -> bool:
         
         try:
             if parallel:
-                print(f"Running Parallel PTF with {num_workers or 'auto'} workers...")
-                exec_time = run_ptf_algorithm_parallel_with_timing(
-                    file_path=input_path,
-                    top_k=top_k,
-                    output_file=output_file,
-                    num_workers=num_workers,
-                    metrics_json=metrics_file
-                )
-                print(f"Parallel execution completed in {exec_time:.4f} seconds")
+                if use_multiprocessing:
+                    print(f"Running Multiprocessing PTF with {num_workers or 'auto'} workers...")
+                    exec_time = run_ptf_algorithm_multiprocessing_with_timing(
+                        file_path=input_path,
+                        top_k=top_k,
+                        output_file=output_file,
+                        num_workers=num_workers,
+                        metrics_json=metrics_file
+                    )
+                    print(f"Multiprocessing execution completed in {exec_time:.4f} seconds")
+                else:
+                    print(f"Running Parallel PTF (Threading) with {num_workers or 'auto'} workers...")
+                    exec_time = run_ptf_algorithm_parallel_with_timing(
+                        file_path=input_path,
+                        top_k=top_k,
+                        output_file=output_file,
+                        num_workers=num_workers,
+                        metrics_json=metrics_file
+                    )
+                    print(f"Parallel execution completed in {exec_time:.4f} seconds")
             else:
                 print("Running Sequential PTF...")
                 exec_time = run_ptf_algorithm_with_timing(
