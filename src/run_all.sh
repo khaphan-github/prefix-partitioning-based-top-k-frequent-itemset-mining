@@ -21,14 +21,14 @@ REPORT_DIR="./benchmark/report_27_12"
 
 # Map dataset display names to their input file paths
 declare -A FILES
-FILES[OnlineRetailZZ]="./data/data_set/OnlineRetailZZ.txt"
-FILES[SUSY]="./data/data_set/SUSY.txt"
-FILES[accidents]="./data/data_set/accidents.txt"
-FILES[accidents_spmf]="./data/data_set/accidents_spmf.txt"
+# FILES[OnlineRetailZZ]="./data/data_set/OnlineRetailZZ.txt"
+# FILES[SUSY]="./data/data_set/SUSY.txt"
+# FILES[accidents]="./data/data_set/accidents.txt"
+# FILES[accidents_spmf]="./data/data_set/accidents_spmf.txt"
 FILES[chainstoreFIM]="./data/data_set/chainstoreFIM.txt"
-FILES[connect]="./data/data_set/connect.txt"
-FILES[pumsb]="./data/data_set/pumsb.txt"
-FILES[sample]="./data/data_set/sample.txt"
+# FILES[connect]="./data/data_set/connect.txt"
+# FILES[pumsb]="./data/data_set/pumsb.txt"
+# FILES[sample]="./data/data_set/sample.txt"
 
 for dataset in "${!FILES[@]}"; do
   input="${FILES[$dataset]}"

@@ -1,0 +1,10 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-28T06:55:43.108990
+======================================================================
+
+Configuration:
+  Algorithm: Sequential PTF
+  Top-k: 1000
+  Input Dataset: ./data/data_set/chainstoreFIM.txt
+
