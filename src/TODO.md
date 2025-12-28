@@ -19,8 +19,11 @@
 - [x] Susy
 
 # TODO Next:
-- [ ] Cho Khanh complete parallel then run again.
-
+- [ ] Run lai report cho khanh then thong itn io cost..
+- [ ] Fileword: Ung voi tung buoc trong bai bao thi in ra input & output cua tung step.
+- [ ] Benchmark: Can bieu do the hien topk & time voi tuan tu xong xong, them thong tin in của IO memory giong bai bao de do duocj hieu nang so voi lúc trước cải tiến
+- [ ] & lúc sau cải tiến ứng ơi 2 loaid datta set la chainstore & pumsb.
+- [ ] Side Lem bo cung giong silde, nhan manh cải tiến & cơ chế lưu trử của tác giar
 # Hardware info.
 H/W path           Device          Class          Description
 =============================================================
