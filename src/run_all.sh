@@ -15,7 +15,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT/src"
 
-TOPKS=(2000 1000 500 250 100 50 10)
+TOPKS=(1000 500 250 100 50 10)
 WORKERS="${WORKERS:-4}"
 REPORT_DIR="./benchmark/report_27_12_v4"
 
@@ -27,7 +27,7 @@ declare -A FILES
 # FILES[accidents_spmf]="./data/data_set/accidents_spmf.txt"
 FILES[chainstoreFIM]="./data/data_set/chainstoreFIM.txt"
 # FILES[connect]="./data/data_set/connect.txt"
-# FILES[pumsb]="./data/data_set/pumsb.txt"
+FILES[pumsb]="./data/data_set/pumsb.txt"
 # FILES[sample]="./data/data_set/sample.txt"
 
 for dataset in "${!FILES[@]}"; do

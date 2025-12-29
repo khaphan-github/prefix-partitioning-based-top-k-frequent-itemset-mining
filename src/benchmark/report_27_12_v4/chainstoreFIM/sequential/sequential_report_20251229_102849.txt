@@ -1,0 +1,29 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-29T10:28:49.413921
+======================================================================
+
+Configuration:
+  Algorithm: Sequential PTF
+  Top-k: 10
+  Input Dataset: ./data/data_set/chainstoreFIM.txt
+
+Initial rmsup: 25514
+Initial MH size: 10
+
+Total itemsets found: 10
+Final rmsup: 25514
+
+1. {39684}              => Support: 63818
+2. {16977}              => Support: 58683
+3. {16967}              => Support: 57097
+4. {16978}              => Support: 38036
+5. {16975}              => Support: 36190
+6. {39388}              => Support: 35043
+7. {13743}              => Support: 32564
+8. {5666}               => Support: 27443
+9. {39688}              => Support: 26056
+10. {16881}              => Support: 25514
+Execution time: 66370.72 ms
+Memory used: 19903772.00 KB
+Execution time: 72.1179 seconds

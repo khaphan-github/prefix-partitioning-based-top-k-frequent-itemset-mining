@@ -1,0 +1,119 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-29T10:24:00.086447
+======================================================================
+
+Configuration:
+  Algorithm: Sequential PTF
+  Top-k: 100
+  Input Dataset: ./data/data_set/chainstoreFIM.txt
+
+Initial rmsup: 6477
+Initial MH size: 100
+
+Total itemsets found: 100
+Final rmsup: 6477
+
+1. {39684}              => Support: 63818
+2. {16977}              => Support: 58683
+3. {16967}              => Support: 57097
+4. {16978}              => Support: 38036
+5. {16975}              => Support: 36190
+6. {39388}              => Support: 35043
+7. {13743}              => Support: 32564
+8. {5666}               => Support: 27443
+9. {39688}              => Support: 26056
+10. {16881}              => Support: 25514
+11. {16976}              => Support: 23450
+12. {39432}              => Support: 22878
+13. {39333}              => Support: 20266
+14. {39430}              => Support: 18669
+15. {16985}              => Support: 17876
+16. {21308}              => Support: 17598
+17. {13716}              => Support: 16451
+18. {21738}              => Support: 16016
+19. {39305}              => Support: 15595
+20. {39435}              => Support: 15331
+21. {26149}              => Support: 14749
+22. {39481}              => Support: 14739
+23. {16986}              => Support: 14222
+24. {13746}              => Support: 14122
+25. {39419}              => Support: 14037
+26. {5634}               => Support: 13986
+27. {4973}               => Support: 13935
+28. {39334}              => Support: 13773
+29. {4972}               => Support: 13156
+30. {13718}              => Support: 13123
+31. {3482}               => Support: 12767
+32. {39127}              => Support: 12739
+33. {32365}              => Support: 12215
+34. {1833}               => Support: 12152
+35. {21736}              => Support: 12078
+36. {7317}               => Support: 12050
+37. {22900}              => Support: 11871
+38. {39452}              => Support: 11840
+39. {39138}              => Support: 11771
+40. {1852}               => Support: 11764
+41. {39314}              => Support: 11753
+42. {13734}              => Support: 11693
+43. {16980}              => Support: 11406
+44. {12255}              => Support: 11344
+45. {13730}              => Support: 11201
+46. {3510}               => Support: 10954
+47. {16979}              => Support: 10902
+48. {22888}              => Support: 10846
+49. {4099}               => Support: 10715
+50. {21297}              => Support: 10708
+51. {39681}              => Support: 10399
+52. {13749}              => Support: 10392
+53. {16971}              => Support: 10088
+54. {39393}              => Support: 10055
+55. {21286}              => Support: 9763
+56. {1782}               => Support: 9566
+57. {21015}              => Support: 9531
+58. {43504}              => Support: 9198
+59. {5667}               => Support: 9190
+60. {36114}              => Support: 9161
+61. {39318}              => Support: 9099
+62. {16981}              => Support: 9078
+63. {20275}              => Support: 8891
+64. {11783}              => Support: 8760
+65. {43803}              => Support: 8705
+66. {39609}              => Support: 8594
+67. {43506}              => Support: 8527
+68. {39429}              => Support: 8477
+69. {43804}              => Support: 8468
+70. {3567}               => Support: 8424
+71. {16988}              => Support: 8340
+72. {36202}              => Support: 8331
+73. {5166}               => Support: 8324
+74. {1789}               => Support: 8282
+75. {21283}              => Support: 8185
+76. {39610}              => Support: 8159
+77. {13756}              => Support: 8101
+78. {39206}              => Support: 8028
+79. {5668}               => Support: 7961
+80. {12461}              => Support: 7887
+81. {16967, 16977}       => Support: 7801
+82. {2306}               => Support: 7691
+83. {16989}              => Support: 7670
+84. {39359}              => Support: 7660
+85. {16996}              => Support: 7647
+86. {39189}              => Support: 7547
+87. {11780}              => Support: 7278
+88. {11824}              => Support: 7207
+89. {13707}              => Support: 7199
+90. {16883}              => Support: 7094
+91. {824}                => Support: 6929
+92. {1815}               => Support: 6810
+93. {5644}               => Support: 6740
+94. {36203}              => Support: 6717
+95. {15457}              => Support: 6687
+96. {729}                => Support: 6625
+97. {39458}              => Support: 6610
+98. {43913}              => Support: 6594
+99. {10481}              => Support: 6562
+100. {12266}              => Support: 6477
+Execution time: 66558.44 ms
+Memory used: 19903824.00 KB
+Execution time: 72.2687 seconds
