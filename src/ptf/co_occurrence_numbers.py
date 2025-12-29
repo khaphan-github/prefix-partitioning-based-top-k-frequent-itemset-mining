@@ -31,7 +31,6 @@ class CoOccurrenceNumbers:
 
         for prefix, partition in self.prefix_partition.prefix_partitions.items():
             con_i = {}
-
             for transaction in partition:
                 if not transaction:
                     continue
