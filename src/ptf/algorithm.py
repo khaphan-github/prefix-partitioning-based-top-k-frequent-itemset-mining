@@ -25,25 +25,25 @@ class PrefixPartitioningbasedTopKAlgorithm:
         self.top2_set: Set[frozenset] = set()
 
     def initialize_mh_and_rmsup(self, con_list: List[Tuple[set, int]]):
-         '''
-         Min heap lay top k item trong co-occurrence list
-         rmsub la item dau tien.
+        '''
+        Min heap lay top k item trong co-occurrence list
+        rmsub la item dau tien.
 
-         Also extracts top-2 itemsets for candidate pruning.
-         '''
+        Also extracts top-2 itemsets for candidate pruning.
+        '''
 
-         min_heap = MinHeapTopK(self.top_k)
+        min_heap = MinHeapTopK(self.top_k)
 
-         for con in range(min(self.top_k, len(con_list))):
-             itemset, support = con_list[con]
-             min_heap.insert(support=support, itemset=tuple(itemset))
-         rmsup = min_heap.min_support()
+        for con in range(min(self.top_k, len(con_list))):
+            itemset, support = con_list[con]
+            min_heap.insert(support=support, itemset=tuple(itemset))
+        rmsup = min_heap.min_support()
 
-         # Extract top-2 itemsets for last-item pruning if using candidate pruning
-         if self.partition_processor == SglPartitionHybridCandidatePruning:
-             self.top2_set = self._extract_top2_itemsets(min_heap)
+        # Extract top-2 itemsets for last-item pruning if using candidate pruning
+        if self.partition_processor == SglPartitionHybridCandidatePruning:
+            self.top2_set = self._extract_top2_itemsets(min_heap)
 
-         return min_heap, rmsup
+        return min_heap, rmsup
 
     def build_promissing_item_arrays(self, min_heap: MinHeapTopK, all_items, con_map: dict, rmsup: int):
         '''
@@ -124,7 +124,8 @@ class PrefixPartitioningbasedTopKAlgorithm:
 
         # Process the partition with partition data
             if partitioner and hasattr(partitioner, 'prefix_partitions'):
-                partition_data = partitioner.prefix_partitions.get(partition, [])
+                partition_data = partitioner.prefix_partitions.get(
+                    partition, [])
 
                 # Process the partition using selected processor
                 # (vertical representation built inside execute)
@@ -147,25 +148,25 @@ class PrefixPartitioningbasedTopKAlgorithm:
                         min_heap=min_heap,
                         rmsup=rmsup
                     )
-        
+
         return min_heap, rmsup
-    
+
     @staticmethod
     def _extract_top2_itemsets(min_heap: MinHeapTopK) -> Set[frozenset]:
         """
         Extract all 2-itemsets from min_heap into a set for O(1) lookup.
-        
+
         Args:
             min_heap: MinHeapTopK containing top-k itemsets
-        
+
         Returns:
             Set of frozenset({a, b}) for all 2-itemsets in min_heap
         """
         top2_set = set()
-        
+
         for support, itemset in min_heap.get_all():
             if len(itemset) == 2:
                 pair = frozenset(itemset)
                 top2_set.add(pair)
-        
+
         return top2_set
