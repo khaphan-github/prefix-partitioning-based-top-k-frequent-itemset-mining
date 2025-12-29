@@ -7,8 +7,8 @@ Initial MH size: 8
 Total itemsets found: 8
 Final rmsup: 4
 
-Execution time: 0.0021 seconds
-Memory used: 0.12 MB
+Execution time: 2.28 ms
+Memory used: 256.00 KB
 1. {2}                  => Support: 10
 2. {10}                 => Support: 9
 3. {2, 10}              => Support: 8
@@ -17,7 +17,7 @@ Memory used: 0.12 MB
 6. {2, 9, 10}           => Support: 5
 7. {9, 10}              => Support: 5
 8. {4}                  => Support: 4
-Execution time: 0.0022 seconds
+Execution time: 0.0024 seconds
 
 Test Case 2: top_k=5
 ----------------------------------------
@@ -27,14 +27,14 @@ Initial MH size: 5
 Total itemsets found: 5
 Final rmsup: 7
 
-Execution time: 0.0003 seconds
-Memory used: 0.00 MB
+Execution time: 0.37 ms
+Memory used: 0.00 KB
 1. {2}                  => Support: 10
 2. {10}                 => Support: 9
 3. {2, 10}              => Support: 8
 4. {9}                  => Support: 7
 5. {2, 9}               => Support: 7
-Execution time: 0.0004 seconds
+Execution time: 0.0005 seconds
 
 Test Case 3: top_k=10
 ----------------------------------------
@@ -44,8 +44,8 @@ Initial MH size: 10
 Total itemsets found: 10
 Final rmsup: 3
 
-Execution time: 0.0004 seconds
-Memory used: 0.00 MB
+Execution time: 0.43 ms
+Memory used: 0.00 KB
 1. {2}                  => Support: 10
 2. {10}                 => Support: 9
 3. {2, 10}              => Support: 8
@@ -66,12 +66,12 @@ Initial MH size: 3
 Total itemsets found: 3
 Final rmsup: 8
 
-Execution time: 0.0001 seconds
-Memory used: 0.00 MB
+Execution time: 0.13 ms
+Memory used: 0.00 KB
 1. {2}                  => Support: 10
 2. {10}                 => Support: 9
 3. {2, 10}              => Support: 8
-Execution time: 0.0002 seconds
+Execution time: 0.0003 seconds
 
 Test Case 5: top_k=20
 ----------------------------------------
@@ -81,8 +81,8 @@ Initial MH size: 20
 Total itemsets found: 20
 Final rmsup: 2
 
-Execution time: 0.0006 seconds
-Memory used: 0.00 MB
+Execution time: 0.68 ms
+Memory used: 0.00 KB
 1. {2}                  => Support: 10
 2. {10}                 => Support: 9
 3. {2, 10}              => Support: 8
@@ -103,4 +103,4 @@ Memory used: 0.00 MB
 18. {4, 9}               => Support: 2
 19. {5, 9}               => Support: 2
 20. {5, 10}              => Support: 2
-Execution time: 0.0007 seconds
+Execution time: 0.0008 seconds

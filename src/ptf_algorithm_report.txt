@@ -15,8 +15,8 @@ Final rmsup: 4
 6. {2, 9, 10}           => Support: 5
 7. {9, 10}              => Support: 5
 8. {4}                  => Support: 4
-Execution time: 0.0005 seconds
-Memory used: 0.00 MB
+Execution time: 0.31 ms
+Memory used: 0.00 KB
 
 Test Case 2: top_k=5
 ----------------------------------------
@@ -31,8 +31,8 @@ Final rmsup: 7
 3. {2, 10}              => Support: 8
 4. {9}                  => Support: 7
 5. {2, 9}               => Support: 7
-Execution time: 0.0003 seconds
-Memory used: 0.00 MB
+Execution time: 0.21 ms
+Memory used: 0.00 KB
 
 Test Case 3: top_k=10
 ----------------------------------------
@@ -52,8 +52,8 @@ Final rmsup: 3
 8. {4}                  => Support: 4
 9. {2, 8}               => Support: 3
 10. {4, 10}              => Support: 3
-Execution time: 0.0004 seconds
-Memory used: 0.00 MB
+Execution time: 0.26 ms
+Memory used: 0.00 KB
 
 Test Case 4: top_k=3
 ----------------------------------------
@@ -66,8 +66,8 @@ Final rmsup: 8
 1. {2}                  => Support: 10
 2. {10}                 => Support: 9
 3. {2, 10}              => Support: 8
-Execution time: 0.0002 seconds
-Memory used: 0.00 MB
+Execution time: 0.19 ms
+Memory used: 0.00 KB
 
 Test Case 5: top_k=20
 ----------------------------------------
@@ -97,5 +97,5 @@ Final rmsup: 2
 18. {4, 9}               => Support: 2
 19. {5, 9}               => Support: 2
 20. {5, 10}              => Support: 2
-Execution time: 0.0006 seconds
-Memory used: 0.00 MB
+Execution time: 0.28 ms
+Memory used: 0.00 KB
