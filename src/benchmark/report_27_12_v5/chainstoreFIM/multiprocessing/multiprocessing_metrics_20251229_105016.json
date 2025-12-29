@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-12-29T10:51:28.450884",
+  "algorithm": "PTF-Parallel",
+  "metrics": {
+    "execution_time_ms": 72268.22710037231,
+    "memory_used_kb": 1498324.0
+  },
+  "parameters": {
+    "top_k": 250,
+    "num_workers": 4
+  }
+}

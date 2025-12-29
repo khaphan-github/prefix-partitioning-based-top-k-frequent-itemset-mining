@@ -17,7 +17,7 @@ cd "$REPO_ROOT/src"
 
 TOPKS=(1000 500 250 100 50 10)
 WORKERS="${WORKERS:-4}"
-REPORT_DIR="./benchmark/report_27_12_v4"
+REPORT_DIR="./benchmark/report_27_12_v5"
 
 # Map dataset display names to their input file paths
 declare -A FILES
