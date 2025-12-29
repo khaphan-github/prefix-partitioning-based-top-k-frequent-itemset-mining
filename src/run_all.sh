@@ -16,16 +16,16 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT/src"
 
 TOPKS=(1000 500 250 100 50 10)
-WORKERS="${WORKERS:-20}"
-REPORT_DIR="./benchmark/report_27_12_v6"
+WORKERS="${WORKERS:-10}"
+REPORT_DIR="./benchmark/report_30_12_v1"
 
 # Map dataset display names to their input file paths
 declare -A FILES
-# FILES[OnlineRetailZZ]="./data/data_set/OnlineRetailZZ.txt"
+FILES[OnlineRetailZZ]="./data/data_set/OnlineRetailZZ.txt"
 # FILES[SUSY]="./data/data_set/SUSY.txt"
 # FILES[accidents]="./data/data_set/accidents.txt"
 # FILES[accidents_spmf]="./data/data_set/accidents_spmf.txt"
-FILES[chainstoreFIM]="./data/data_set/chainstoreFIM.txt"
+# FILES[chainstoreFIM]="./data/data_set/chainstoreFIM.txt"
 # FILES[connect]="./data/data_set/connect.txt"
 FILES[pumsb]="./data/data_set/pumsb.txt"
 # FILES[sample]="./data/data_set/sample.txt"
