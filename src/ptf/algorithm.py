@@ -84,8 +84,8 @@ class PrefixPartitioningbasedTopKAlgorithm:
                     sup = con_map.get(frozenset([x_i, y]), 0)
 
                 # Keep item only if support >= rmsup
-                if sup >= rmsup:
-                    new_arr.append(y)
+                # if sup >= rmsup:
+                new_arr.append(y)
 
             promising_items_arr[x_i] = sorted(set(new_arr))
 
