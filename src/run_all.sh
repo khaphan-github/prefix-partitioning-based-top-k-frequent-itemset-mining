@@ -16,8 +16,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT/src"
 
 TOPKS=(1000 500 250 100 50 10)
-WORKERS="${WORKERS:-4}"
-REPORT_DIR="./benchmark/report_27_12_v5"
+WORKERS="${WORKERS:-20}"
+REPORT_DIR="./benchmark/report_27_12_v6"
 
 # Map dataset display names to their input file paths
 declare -A FILES
