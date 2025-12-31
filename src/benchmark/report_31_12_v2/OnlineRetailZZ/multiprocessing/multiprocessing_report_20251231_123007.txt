@@ -1,0 +1,30 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-31T12:30:07.786906
+======================================================================
+
+Configuration:
+  Algorithm: Parallel PTF (Threading)
+  Top-k: 10
+  Input Dataset: ./data/data_set/OnlineRetailZZ.txt
+  Workers: 6
+
+Initial rmsup: 29159
+Initial MH size: 10
+
+Total itemsets found: 10
+Final rmsup: 29159
+
+Execution time: 3482.33 ms
+Memory used: 369020.00 KB
+1. {1943}               => Support: 54430
+2. {1534}               => Support: 53351
+3. {225}                => Support: 51911
+4. {1816}               => Support: 42902
+5. {1097}               => Support: 38714
+6. {1834}               => Support: 35126
+7. {2339}               => Support: 33748
+8. {720}                => Support: 30066
+9. {1680}               => Support: 29526
+10. {1534, 1943}         => Support: 29159
+Execution time: 4.1021 seconds

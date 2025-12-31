@@ -1,0 +1,70 @@
+======================================================================
+PTF Algorithm Report
+Generated: 2025-12-31T12:29:58.551159
+======================================================================
+
+Configuration:
+  Algorithm: Parallel PTF (Threading)
+  Top-k: 50
+  Input Dataset: ./data/data_set/OnlineRetailZZ.txt
+  Workers: 6
+
+Initial rmsup: 9798
+Initial MH size: 50
+
+Total itemsets found: 50
+Final rmsup: 9798
+
+Execution time: 3974.03 ms
+Memory used: 375192.00 KB
+1. {1943}               => Support: 54430
+2. {1534}               => Support: 53351
+3. {225}                => Support: 51911
+4. {1816}               => Support: 42902
+5. {1097}               => Support: 38714
+6. {1834}               => Support: 35126
+7. {2339}               => Support: 33748
+8. {720}                => Support: 30066
+9. {1680}               => Support: 29526
+10. {1534, 1943}         => Support: 29159
+11. {547}                => Support: 25131
+12. {358}                => Support: 24403
+13. {426}                => Support: 21461
+14. {1215}               => Support: 21139
+15. {1394}               => Support: 20842
+16. {2375}               => Support: 20813
+17. {1816, 1834}         => Support: 20265
+18. {324}                => Support: 19316
+19. {225, 1215}          => Support: 18970
+20. {90}                 => Support: 18695
+21. {1336}               => Support: 18525
+22. {1084}               => Support: 17037
+23. {1989}               => Support: 16998
+24. {1126}               => Support: 16261
+25. {1582}               => Support: 15637
+26. {1394, 1989}         => Support: 15134
+27. {2183}               => Support: 14559
+28. {2027}               => Support: 14333
+29. {1605}               => Support: 14142
+30. {1534, 1582}         => Support: 14136
+31. {225, 1336}          => Support: 13793
+32. {461}                => Support: 13280
+33. {114}                => Support: 13146
+34. {708}                => Support: 12981
+35. {2399}               => Support: 12708
+36. {1721}               => Support: 12472
+37. {1017}               => Support: 12125
+38. {479}                => Support: 12014
+39. {349}                => Support: 11697
+40. {2202}               => Support: 11689
+41. {21}                 => Support: 11401
+42. {1165}               => Support: 11218
+43. {1126, 2183}         => Support: 11093
+44. {181}                => Support: 10962
+45. {2060}               => Support: 10831
+46. {1142}               => Support: 10425
+47. {2363}               => Support: 9975
+48. {2395}               => Support: 9880
+49. {426, 1534}          => Support: 9860
+50. {1264}               => Support: 9798
+Execution time: 4.7219 seconds
