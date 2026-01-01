@@ -32,8 +32,8 @@ def run_ptf_algorithm(file_path: str, top_k: int = 8, output_file=None):
             f"Build partitioner: {end_time - start_time:.4f} seconds", output_file)
 
         start_time = time.time()
-        # co_occurrence_numbers = CoOccurrenceNumbersParallel(partitioner, db)
-        co_occurrence_numbers = CoOccurrenceNumbers(partitioner, db)
+        co_occurrence_numbers = CoOccurrenceNumbersParallel(partitioner, db)
+        # co_occurrence_numbers = CoOccurrenceNumbers(partitioner, db)
         end_time = time.time()
         write_output(
             f"Compute co-occurrence numbers: {end_time - start_time:.4f} seconds", output_file)
@@ -92,7 +92,7 @@ def run_ptf_algorithm(file_path: str, top_k: int = 8, output_file=None):
     write_output(f"Memory used: {metrics.memory_used_kb:.2f} KB", output_file)
 
 
-def run_ptf_algorithm_with_timing(file_path: str, top_k: int = 8, output_file=None, metrics_json: Optional[str] = None) -> float:
+def run_ptf_algorithm_with_timing_co_occurent(file_path: str, top_k: int = 8, output_file=None, metrics_json: Optional[str] = None) -> float:
     """
     Run PTF algorithm and measure execution time.
 

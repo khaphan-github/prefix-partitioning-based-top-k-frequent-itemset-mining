@@ -7,7 +7,7 @@ if __name__ == "__main__":
         report_file = open("ptf_algorithm_report.txt", "w")
 
         test_cases = [
-            (8, "Test Case 1: top_k=8"),
+            (1000, "Test Case 1: top_k=8"),
             # (5, "Test Case 2: top_k=5"),
             # (10, "Test Case 3: top_k=10"),
             # (3, "Test Case 4: top_k=3"),
@@ -19,7 +19,7 @@ if __name__ == "__main__":
             report_file.write("-" * 40 + "\n")
             try:
                 with ExecutionTimer(f"Running {label}"):
-                    run_ptf_algorithm("data/sample.txt",
+                    run_ptf_algorithm("data/data_set/pumsb.txt",
                                       top_k=top_k, output_file=report_file)
             except FileNotFoundError as e:
                 report_file.write(f"Error: {e}\n")
