@@ -5,51 +5,71 @@
 ```bash
 cd src
 pip install -r requirments.txt
+python3 main_with_args.py
 ```
 
-## Chạy chương trình
+# Configuration Documentation
 
-| Lệnh                                                      | Mô tả           |
-| --------------------------------------------------------- | --------------- |
-| `python3 main_with_json_config.py config_sequential.json` | Xử lý tuần tự   |
-| `python3 main_with_json_config.py config_multiprocessing.json`   | Xử lý song song |
-| `python3 main.py`                                         | Chạy mặc định   |
+## Overview
+This document describes the benchmark configuration used in `main_with_args.py` for testing the PTF algorithm with different datasets and execution modes.
 
-## Kiểm thử
+## Report Output Location
+```python
+REPORT_FOL = './benchmark/reports_01_01_v3'
+```
+All benchmark reports and metrics will be saved in this directory.
+
+## Datasets
+
+### 1. PUMSB Dataset
+- **Name**: `pumsb`
+- **File Path**: `./data/data_set/pumsb.txt`
+- **Output Directory**: `./benchmark/reports_01_01_v3/pumsb_{runner_name}`
+- **Top-K Values**: [10, 100, 1000, 5000, 10000]
+
+### 2. OnlineRetailZZ Dataset
+- **Name**: `OnlineRetailZZ`
+- **File Path**: `./data/data_set/OnlineRetailZZ.txt`
+- **Output Directory**: `./benchmark/reports_01_01_v3/OnlineRetailZZ_{runner_name}`
+- **Top-K Values**: [10, 100, 1000, 5000, 10000]
+
+## Runners
+
+### 1. Sequential Runner
+- **Name**: `sequential`
+- **Description**: Sequential (single-threaded) execution of the PTF algorithm
+- **Vietnamese**: Tuan tu (Tuần tự)
+
+### 2. Parallel Co-Occurrent Runner
+- **Name**: `parallel_co_occurrent`
+- **Description**: Parallel execution with concurrent co-occurrence updates
+- **Vietnamese**: XOn xong kha uopdate (Xong xong khả update)
+
+## Execution Flow
+
+The script will execute:
+- **Total Runs**: 2 datasets × 5 top-k values × 2 runners = **20 benchmark runs**
+
+For each combination:
+1. Dataset is loaded from the specified file path
+2. Algorithm runs with the specified top-k value
+3. Results are saved to: `{output_dir}_{runner_name}/{runner_name}_report_{timestamp}.txt`
+4. Metrics are saved to: `{output_dir}_{runner_name}/{runner_name}_metrics_{timestamp}.json`
+
+## Example Output Paths
+
+### For PUMSB with Sequential Runner (top-k=1000):
+- Report: `./benchmark/reports_01_01_v3/pumsb_sequential/sequential_report_20260101_143025.txt`
+- Metrics: `./benchmark/reports_01_01_v3/pumsb_sequential/sequential_metrics_20260101_143025.json`
+
+### For OnlineRetailZZ with Parallel Co-Occurrent Runner (top-k=5000):
+- Report: `./benchmark/reports_01_01_v3/OnlineRetailZZ_parallel_co_occurrent/parallel_co_occurrent_report_20260101_145530.txt`
+- Metrics: `./benchmark/reports_01_01_v3/OnlineRetailZZ_parallel_co_occurrent/parallel_co_occurrent_metrics_20260101_145530.json`
+
+## Running the Benchmarks
 
 ```bash
-python -m pytest ./tests/ -v
+python3 main_with_args.py
 ```
 
-## Cấu hình JSON
-
-Chỉnh sửa file `config_*.json`:
-
-| Tham số              | Mô tả                                      |
-| -------------------- | ------------------------------------------ |
-| `top_k`              | Số frequent itemset cần lấy (mặc định: 20) |
-| `parallel`           | Bật/tắt xử lý song song (mặc định: false)  |
-| `num_workers`        | Số luồng xử lý song song (chỉ khi parallel=true) |
-| `input_dataset_path` | Đường dẫn file dữ liệu input               |
-| `output_report`      | Thư mục lưu kết quả (dùng để vẽ biểu đồ)   |
-| `save_metrics`       | Bật/tắt lưu metrics                        |
-
-### Song song hóa cấp độ Phân vùng (Partition-Level Parallelism)
-
-Khi `parallel: true`, thuật toán sử dụng Thread Pool để xử lý các phân vùng song song:
-
-- Mỗi phân vùng $P_i$ (nếu không bị cắt tỉa) được xử lý bởi một luồng riêng biệt
-- Sử dụng `ThreadPoolExecutor` với số lượng worker được cấu hình bởi `num_workers`
-- Mỗi worker có bản sao cục bộ của Min-Heap (MH) để tránh xung đột
-- Kết quả từ tất cả các worker được gộp lại sau khi hoàn thành
-
-**Lợi ích:**
-- Tăng tốc độ xử lý trên hệ thống đa nhân
-- Tận dụng tối đa tài nguyên CPU
-- Giảm thời gian thực thi cho các tập dữ liệu lớn
-
-## Quy trình xử lý
-
-1. Chạy `main_with_json_config.py` với file config tương ứng
-2. Dữ liệu từ `/data` → Thuật toán xử lý → Kết quả lưu vào `/benchmark`
-3. Sử dụng notebook để vẽ biểu đồ từ dữ liệu trong `/benchmark`
+The script will automatically execute all configured combinations sequentially.
