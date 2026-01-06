@@ -32,7 +32,8 @@ def run_ptf_algorithm(file_path: str, top_k: int = 8, output_file=None):
             f"Build partitioner: {end_time - start_time:.4f} seconds", output_file)
 
         start_time = time.time()
-        co_occurrence_numbers = CoOccurrenceNumbersParallel(partitioner, db)
+        co_occurrence_numbers = CoOccurrenceNumbersParallel(
+            partitioner, db, True, 8)
         # co_occurrence_numbers = CoOccurrenceNumbers(partitioner, db)
         end_time = time.time()
         write_output(
