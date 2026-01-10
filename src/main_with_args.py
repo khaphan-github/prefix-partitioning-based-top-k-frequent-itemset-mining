@@ -117,19 +117,25 @@ def main(config: Dict):
 
 if __name__ == "__main__":
     # Define dataset configurations
-    REPORT_FOL = './benchmark/reports_01_01_v3'
+    REPORT_FOL = './benchmark/reports_06_01_v1'
     datasets = [
+        # {
+        #     'name': 'pumsb',
+        #     'file': './data/data_set/pumsb.txt',
+        #     'output_dir': f'{REPORT_FOL}/pumsb',
+        #     'top_k_values': [1000, 3000, 5000, 7000, 10000]
+        # },
+        # {
+        #     'name': 'OnlineRetailZZ',
+        #     'file': './data/data_set/OnlineRetailZZ.txt',
+        #     'output_dir': f'{REPORT_FOL}/OnlineRetailZZ',
+        #     'top_k_values': [1000, 3000, 5000, 7000, 10000]
+        # },
         {
-            'name': 'pumsb',
-            'file': './data/data_set/pumsb.txt',
-            'output_dir': f'{REPORT_FOL}/pumsb',
-            'top_k_values': [10, 100, 1000, 5000, 10000]
-        },
-        {
-            'name': 'OnlineRetailZZ',
-            'file': './data/data_set/OnlineRetailZZ.txt',
-            'output_dir': f'{REPORT_FOL}/OnlineRetailZZ',
-            'top_k_values': [10, 100, 1000, 5000, 10000]
+            'name': 'chainstoreFIM',
+            'file': './data/data_set/chainstoreFIM.txt',
+            'output_dir': f'{REPORT_FOL}/chainstoreFIM',
+            'top_k_values': [1000, 3000, 5000, 7000, 10000]
         }
     ]
 
